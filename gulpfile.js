@@ -54,3 +54,13 @@ gulp.task('default', ['style', 'js', 'browser-sync'], function() {
 	gulp.watch('styles/**/*.styl', ['style']);
 	gulp.watch('js/**/*', ['js', browserSync.reload]);
 });
+
+
+
+
+var deploy = require('gulp-gh-pages');
+
+gulp.task('deploy', function() {
+	return gulp.src('./**/*')
+		.pipe(deploy());
+});
