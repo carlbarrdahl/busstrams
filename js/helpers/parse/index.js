@@ -16,7 +16,9 @@ var Parser = {
 	},
 
 	departures: function(data) {
-		return data.DepartureBoard.Departure.sort(function(a, b) {
+		var departures = groupDepartures(data.DepartureBoard.Departure);
+
+		return departures.sort(function(a, b) {
 			return new Date('1970/01/01 ' + a.rtTime) - new Date('1970/01/01 ' + b.rtTime);
 		});
 	},
@@ -27,21 +29,20 @@ var Parser = {
 				return stop;
 			}
 		});
-
-
-
-		// var serverTime = moment(data.serverTime);
-		// var journey = data.JourneyDetail.Stop.filter(function(stop) {
-		// 	console.log(serverTime.isBefore(moment(stop.rtArrTime)))
-		// 	if (stop.rtArrTime) {
-		// 		return stop;
-		// 	}
-		// });
-
-		// return {
-		// 	journey: journey
-		// };
 	}
 };
+
+function groupDepartures(departures) {
+	for (var i = 0; i < departures.length; i++) {
+		for (var j = 0; j < departures.length; j++) {
+			if (departures[i].sname === departures[j].sname) {
+				departures[i].rtNext = departures[j].rtTime;
+				departures.splice(j, 1);
+			}
+		}
+	}
+
+	return departures;
+}
 
 module.exports = Parser;

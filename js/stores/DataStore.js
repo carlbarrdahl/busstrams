@@ -42,16 +42,10 @@ function parseDepartures(data) {
 }
 
 function parseJourney(data) {
-	console.log('parseJourney', data)
+	console.log('parseJourney', data);
 	_serverTime = setServerTime(data.JourneyDetail.servertime);
 
 	_journey = parse.journey(data);
-
-	// var journey = data.JourneyDetail.Stop.filter(function(stop) {
-	// 	if (stop.rtArrTime) {
-	// 		return stop;
-	// 	}
-	// });
 
 	return {
 		journey: _journey
@@ -79,7 +73,6 @@ var DataStore = merge(EventEmitter.prototype, {
 	},
 
 	journey: function(url) {
-		url.replace('http:', '');
 		return req.journey(url).then(parseJourney);
 	},
 

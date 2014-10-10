@@ -28,9 +28,10 @@ var DepartureItem = React.createClass({
 				<div>
 					<h3>{departure.direction}</h3>
 					<ol>
-						<li>{departure.type}</li>
-						<li>Läge <strong>{departure.track}</strong></li>
 						<li>{departure.rtTime}</li>
+						<li>{departure.rtNext}</li>
+						<li>Läge <strong>{departure.track}</strong></li>
+						<li>{departure.type}</li>
 					</ol>
 				</div>
 			</Link>
