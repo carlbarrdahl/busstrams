@@ -27,7 +27,7 @@ var Header = React.createClass({
 	render: function() {
 		var header = this.state.header;
 		return (
-			<header>{header}</header>
+			<header className="Header">{header}</header>
 		);
 	},
 

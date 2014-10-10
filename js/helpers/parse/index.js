@@ -1,3 +1,9 @@
+/*
+
+TODO
+Clean this up you filthy peon!
+ */
+
 var moment = require('moment');
 var geo = require('../geo');
 
@@ -16,10 +22,18 @@ var Parser = {
 	},
 
 	departures: function(data) {
-		var departures = groupDepartures(data.DepartureBoard.Departure);
+		// var departures = data.DepartureBoard.Departure.sort(function(a, b) {
+		// 	console.log(a.rtTime, b.rtTime)
+		// 	return a.sname > b.sname ? 1 : -1;
+		// 	// return new Date('1970/01/01 ' + a.rtTime) - new Date('1970/01/01 ' + b.rtTime);
+		// });
+		// console.log(data, departures)
+		// return groupDepartures(departures);
+
+		departures = groupDepartures(data.DepartureBoard.Departure);
 
 		return departures.sort(function(a, b) {
-			return new Date('1970/01/01 ' + a.rtTime) - new Date('1970/01/01 ' + b.rtTime);
+			return new Date('1970/01/01 ' + a.rtTime || '00:00') - new Date('1970/01/01 ' + b.rtTime || '00:00');
 		});
 	},
 
@@ -33,8 +47,20 @@ var Parser = {
 };
 
 function groupDepartures(departures) {
+	console.log(departures)
 	for (var i = 0; i < departures.length; i++) {
+		// var departure = departures[i];
+		// var nextDeparture = departures[i + 1];
+
+		// console.log(departure, nextDeparture)
+		// if (nextDeparture) {
+		// 	if (departure.sname === nextDeparture.sname) {
+		// 		departure.rtNext = nextDeparture.rtTime;
+		// 		// departures.splice(j, 1);
+		// 	}
+		// }
 		for (var j = 0; j < departures.length; j++) {
+			console.log('groupDepartures', departures[i], departures[j])
 			if (departures[i].sname === departures[j].sname) {
 				departures[i].rtNext = departures[j].rtTime;
 				departures.splice(j, 1);
@@ -43,6 +69,10 @@ function groupDepartures(departures) {
 	}
 
 	return departures;
+}
+
+function compare(x, y) {
+	return x > y ? 1 : x < y ? -1 : 0;
 }
 
 module.exports = Parser;

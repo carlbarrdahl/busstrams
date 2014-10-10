@@ -5,6 +5,10 @@ var Link = Router.Link;
 
 var PureRenderMixin = React.addons.PureRenderMixin;
 
+var Icon = require('../Common/Icon.jsx');
+
+var DataStore = require('../../stores/DataStore');
+
 var DepartureItem = React.createClass({
 
 	mixins: [PureRenderMixin],
@@ -14,26 +18,35 @@ var DepartureItem = React.createClass({
 	},
 
 	render: function() {
+		console.log('DepartureItem', this.props.departure);
 		var departure = this.props.departure;
-		console.log('DepartureItem', departure);
 
 		var style = {
 			backgroundColor: departure.fgColor,
 			color: departure.bgColor
 		};
 
+		var departureTimes = {
+			next: DataStore.getDepartureIn(departure.rtTime),
+			after: DataStore.getDepartureIn(departure.rtNext)
+		};
+
 		return (
 			<Link to="journey" params={departure} query={departure.JourneyDetailRef}>
 				<figure style={style}><span>{departure.sname}</span></figure>
-				<div>
-					<h3>{departure.direction}</h3>
+				<section>
+					<header>
+						<h3><Icon type={departure.type} /> {departure.direction}</h3>
+						<div>
+							<span>{departureTimes.next}</span>
+							<span>{departureTimes.after}</span>
+						</div>
+					</header>
 					<ol>
-						<li>{departure.rtTime}</li>
-						<li>{departure.rtNext}</li>
+						<li><Icon type={departure.accessibility || ''} /></li>
 						<li>Läge <strong>{departure.track}</strong></li>
-						<li>{departure.type}</li>
 					</ol>
-				</div>
+				</section>
 			</Link>
 		);
 	}
@@ -43,11 +56,16 @@ var DepartureItem = React.createClass({
 module.exports = DepartureItem;
 
 /*
-<span>{departure.time} {time.difference(departure.time, departure.rtTime)}</span>
-
-var start = moment([2007, 0, 5]);
-var end   = moment([2007, 0, 10]);
-end.from(start);       // "in 5 days"
-end.from(start, true); // "5 days"
-{departure.name} {departure.direction} {departure.time} {time.difference(departure.time, departure.rtTime)}
+			<Link to="journey" params={departure} query={departure.JourneyDetailRef}>
+				<figure style={style}><span>{departure.sname}</span></figure>
+				<div>
+					<header>
+						<h3><Icon type={departure.type} /> {departure.direction}</h3>
+						<time>{departureTime.next} <span>{departureTime.after}</span></time>
+					</header>
+					<ol>
+						<li>Läge <strong>{departure.track}</strong></li>
+					</ol>
+				</div>
+			</Link>
  */

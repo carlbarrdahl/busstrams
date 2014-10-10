@@ -7,10 +7,12 @@ var merge = require('react/lib/merge');
 var geo = require('../helpers/geo');
 var parse = require('../helpers/parse');
 var req = require('../helpers/request');
+var time = require('../helpers/time');
 
 var CHANGE_EVENT = 'change';
 
 var _header;
+
 var _stations = [];
 var _departures = [];
 var _journey = [];
@@ -18,12 +20,14 @@ var _journey = [];
 var _serverTime;
 
 function setServerTime(time) {
-	_serverTime = moment(new Date().getTime(time));
+	return (_serverTime = time);
 }
 
 function parseStations(data) {
-	console.log('parseStations', data)
-	_serverTime = setServerTime(data.LocationList.servertime);
+	console.log('parseStations', data);
+
+	setServerTime(data.LocationList.servertime);
+
 	_stations = parse.stations(data);
 
 	return {
@@ -33,7 +37,9 @@ function parseStations(data) {
 
 function parseDepartures(data) {
 	console.log('parseDepartures', data);
-	_serverTime = setServerTime(data.DepartureBoard.servertime);
+
+	setServerTime(data.DepartureBoard.servertime);
+
 	_departures = parse.departures(data);
 
 	return {
@@ -43,7 +49,8 @@ function parseDepartures(data) {
 
 function parseJourney(data) {
 	console.log('parseJourney', data);
-	_serverTime = setServerTime(data.JourneyDetail.servertime);
+
+	setServerTime(data.JourneyDetail.servertime);
 
 	_journey = parse.journey(data);
 
@@ -63,7 +70,7 @@ var DataStore = merge(EventEmitter.prototype, {
 	},
 
 	stations: function() {
-		setHeader('');
+		setHeader('Avgång');
 		return this.location().then(req.stations).then(parseStations);
 	},
 
@@ -73,7 +80,12 @@ var DataStore = merge(EventEmitter.prototype, {
 	},
 
 	journey: function(url) {
+		url.replace('http:', '');
 		return req.journey(url).then(parseJourney);
+	},
+
+	getDepartureIn: function(departure) {
+		return time.difference(departure, _serverTime);
 	},
 
 	emitChange: function() {

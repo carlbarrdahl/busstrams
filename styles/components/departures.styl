@@ -1,10 +1,21 @@
 /*
 
 Departures
-	a
-		span
-		h3
-
+	<a>
+		<figure style={style}><span>{departure.sname}</span></figure>
+		<section>
+			<header>
+				<h3><Icon type={departure.type} /> {departure.direction}</h3>
+				<div>
+					<span>{departureTimes.next}</span>
+					<span>{departureTimes.after}</span>
+				</div>
+			</header>
+			<ol>
+				<li>Läge <strong>{departure.track}</strong></li>
+			</ol>
+		</section>
+	</a>
  */
 
 .Departures
@@ -32,14 +43,34 @@ Departures
 			justify-content: center;
 			margin-right 16px
 
-		div
+		section
 			flex 1
 
-			h3
-				flex 1
-				white-space nowrap
-				overflow hidden
-				text-overflow ellipsis
+			header
+				display flex
+
+				h3
+					flex 1
+					white-space nowrap
+					overflow hidden
+					text-overflow ellipsis
+
+				div
+					width 50px
+
+					span
+						display inline-block
+
+						&:nth-child(1)
+							width 25px
+							text-align right
+							padding-right 10px
+
+						&:nth-child(2)
+							font-size 50%
+
+
+
 
 			ol
 				font-size 80%

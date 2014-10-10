@@ -1,14 +1,11 @@
+var moment = require('moment');
 var Time = {
-	difference: function(start, stop) {
-		if (!start || !stop) return '';
-		var data = {
-			start: start,
-			stop: stop,
-			difference: toMinutes(start) - toMinutes(stop)
-		};
-
-		var diff = toMinutes(stop) - toMinutes(start);
-		return diff > 0 ? '+' + diff : diff === 0 ? '' : diff;
+	difference: function(start, end) {
+		if (!start || !end) {
+			return '-';
+		}
+		var diff = toMinutes(start) - toMinutes(end);
+		return diff > 0 ? diff : 'Nu';
 	}
 };
 

@@ -19,11 +19,6 @@ var Stations = React.createClass({
 
 	componentDidMount: function() {
 		this._getStations();
-		intervalId = setInterval(this._getStations.bind(this), 5000);
-	},
-
-	componentWillUnmount: function() {
-		clearInterval(intervalId);
 	},
 
 	render: function() {
