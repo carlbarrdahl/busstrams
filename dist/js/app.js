@@ -84,7 +84,7 @@ var Tram = React.createClass({displayName: 'Tram',
 		}
 
 		var icon = 'icon icon-' + type;
-		var src = '../../assets/icons/' + type + '.svg';
+		var src = '../../../assets/icons/' + type + '.svg';
 		return (isvg({className: icon, src: src}));
 	}
 
