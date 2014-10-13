@@ -3,8 +3,29 @@
 	width 16px
 	height 16px
 
-// .icon.icon-tram svg
-// 	fill maroon
+.icon.icon-wheelchair
+	padding-left 2px
 
-// .icon.icon-bus svg
-// 	fill navy
+.icon.icon-spinner svg
+	position absolute
+	left 50%
+	margin-left	-32px
+	top 60px
+	width 64px
+	height 64px
+
+	g path
+		transform-origin 50% 50%
+		transform translate3d(0, 0, 0)
+		backface-visibility hidden
+
+	for $j in (1)..(8)
+		g path:nth-of-type({$j})
+			-webkit-animation spin_full 1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite
+
+
+
+@keyframes spin_full {
+	0%   { transform: rotate(0deg);   }
+	100% { transform: rotate(360deg); }
+}

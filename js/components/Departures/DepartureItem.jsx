@@ -31,22 +31,42 @@ var DepartureItem = React.createClass({
 			after: DataStore.getDepartureIn(departure.rtNext)
 		};
 
+		var direction = departure.direction.split('via');
+
+
+		var listItems = [];
+		if (departure.accessibility) {
+			listItems.push(<li><Icon type={departure.accessibility || ''} /></li>);
+		}
+
+		if (direction[1]) {
+			listItems.push(<li>Via: {direction[1]}</li>);
+		}
+
+		if (departure.track) {
+			// listItems.push(<li>Läge <strong>{departure.track}</strong></li>);
+		}
+
+
 		return (
 			<Link to="journey" params={departure} query={departure.JourneyDetailRef}>
 				<figure style={style}><span>{departure.sname}</span></figure>
-				<section>
-					<header>
-						<h3><Icon type={departure.type} /> {departure.direction}</h3>
-						<div>
+				<div className="col">
+					<div className="row">
+						<h4 className="col"><Icon type={departure.type} /> {direction[0]}</h4>
+						<div className="-time">
 							<span>{departureTimes.next}</span>
 							<span>{departureTimes.after}</span>
 						</div>
-					</header>
-					<ol>
-						<li><Icon type={departure.accessibility || ''} /></li>
-						<li>Läge <strong>{departure.track}</strong></li>
-					</ol>
-				</section>
+					</div>
+					<div className="-meta row">
+						<div className="col">
+							<Icon type={departure.accessibility || ''} />
+							{direction[1] ? 'Via' + direction[1] : ''}
+						</div>
+						<div className="-track">Läge {departure.track}</div>
+					</div>
+				</div>
 			</Link>
 		);
 	}
@@ -58,14 +78,15 @@ module.exports = DepartureItem;
 /*
 			<Link to="journey" params={departure} query={departure.JourneyDetailRef}>
 				<figure style={style}><span>{departure.sname}</span></figure>
-				<div>
+				<section>
 					<header>
-						<h3><Icon type={departure.type} /> {departure.direction}</h3>
-						<time>{departureTime.next} <span>{departureTime.after}</span></time>
+						<h3><Icon type={departure.type} /> {direction[0]} </h3>
+						<div>
+							<span>{departureTimes.next}</span>
+							<span>{departureTimes.after}</span>
+						</div>
 					</header>
-					<ol>
-						<li>Läge <strong>{departure.track}</strong></li>
-					</ol>
-				</div>
+					<ol>{listItems}</ol>
+				</section>
 			</Link>
  */

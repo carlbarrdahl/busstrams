@@ -4,13 +4,14 @@
   "description": "Transit app for Västtrafik",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "Carl Barrdahl <carlbarrdahl@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "browser-sync": "^1.5.2",
     "browserify": "^5.12.1",
+    "data-collection": "^1.1.5",
     "del": "^0.1.3",
     "es6-promise": "^1.0.0",
     "flux": "^2.0.1",

@@ -43,33 +43,34 @@ Departures
 			justify-content: center;
 			margin-right 16px
 
-		section
+
+		h4
 			flex 1
+			white-space nowrap
+			overflow hidden
+			text-overflow ellipsis
 
-			header
-				display flex
+		.-meta
+			font-size 70%
 
-				h3
-					flex 1
-					white-space nowrap
-					overflow hidden
-					text-overflow ellipsis
+			.-track
+				width 50px
+				text-align center
+				padding-top 4px
 
-				div
-					width 50px
+		.-time
+			width 50px
 
-					span
-						display inline-block
+			span
+				display inline-block
 
-						&:nth-child(1)
-							width 25px
-							text-align right
-							padding-right 10px
+				&:nth-child(1)
+					width 25px
+					text-align right
+					padding-right 10px
 
-						&:nth-child(2)
-							font-size 50%
-
-
+				&:nth-child(2)
+					font-size 50%
 
 
 			ol
@@ -77,5 +78,4 @@ Departures
 				display flex
 
 				li
-					flex 1
-
+					padding-right 6px

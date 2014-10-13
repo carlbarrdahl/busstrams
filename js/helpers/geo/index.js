@@ -1,5 +1,3 @@
-// https://github.com/nwhite89/GeoDistance
-
 var earthRadius = 6371000;
 var options = {
 	enableHighAccuracy: true,
@@ -11,17 +9,12 @@ var options = {
 var _lastPosition;
 var Geo = {
 	position: function(position) {
-		if (position) {
-			return (_lastPosition = position);
-		} else {
-			return _lastPosition;
-		}
+		return position ? (_lastPosition = position) : _lastPosition;
 	},
 
 	getLocation: function() {
 		return new Promise(function(resolve, reject) {
-				navigator.geolocation.watchPosition(function(position) {
-					console.log(position);
+				navigator.geolocation.getCurrentPosition(function(position) {
 					resolve(this.position(position));
 				}.bind(this), reject, options);
 			}.bind(this));
