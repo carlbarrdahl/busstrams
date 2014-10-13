@@ -33,7 +33,7 @@ var Departures = React.createClass({
 	},
 
 	_getDepartures: function() {
-		DataStore.departures(this.props.query.name, this.props.params.id).then(this.setState.bind(this));
+		DataStore.departures(this.props.query).then(this.setState.bind(this));
 	}
 });
 

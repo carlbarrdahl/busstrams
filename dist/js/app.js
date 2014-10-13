@@ -128,21 +128,6 @@ var DepartureItem = React.createClass({displayName: 'DepartureItem',
 
 		var direction = departure.direction.split('via');
 
-
-		var listItems = [];
-		if (departure.accessibility) {
-			listItems.push(React.DOM.li(null, Icon({type: departure.accessibility || ''})));
-		}
-
-		if (direction[1]) {
-			listItems.push(React.DOM.li(null, "Via: ", direction[1]));
-		}
-
-		if (departure.track) {
-			// listItems.push(<li>Läge <strong>{departure.track}</strong></li>);
-		}
-
-
 		return (
 			Link({to: "journey", params: departure, query: departure.JourneyDetailRef}, 
 				React.DOM.figure({style: style}, React.DOM.span(null, departure.sname)), 
@@ -222,7 +207,7 @@ var Departures = React.createClass({displayName: 'Departures',
 	},
 
 	_getDepartures: function() {
-		DataStore.departures(this.props.query.name, this.props.params.id).then(this.setState.bind(this));
+		DataStore.departures(this.props.query).then(this.setState.bind(this));
 	}
 });
 
@@ -254,14 +239,14 @@ var Journey = React.createClass({displayName: 'Journey',
 	render: function() {
 		var stopId = this.props.params.stopid;
 		var journey = this.state.journey;
-		console.log(journey);
+		console.log('journey', journey);
 
 		var stops = journey.map(function(stop) {
 			return JourneyItem({key: stop.id, stop: stop})
 		});
 
 		return (
-			CSSTransitionGroup({transitionName: "slideUp", className: "Departures"}, 
+			CSSTransitionGroup({transitionName: "slideUp", className: "Stations"}, 
 				stops
 			)
 		)
@@ -293,22 +278,11 @@ var StopItem = React.createClass({displayName: 'StopItem',
 	render: function() {
 		var stop = this.props.stop;
 		console.log(stop)
-		var style = {
-			background: stop.current ? 'red' : 'black'
-		};
-
 
 		return (
 			React.DOM.a(null, 
-				React.DOM.figure({style: style}, React.DOM.span(null)), 
-				React.DOM.div({className: "col"}, 
-					React.DOM.div({className: "row"}, 
-						React.DOM.h4({className: "col"}, stop.name.split(',')[0]), 
-						React.DOM.div({className: "-time"}, 
-							React.DOM.span(null, stop.rtArrTime)
-						)
-					)
-				)
+				React.DOM.h4(null, stop.name.split(',')[0]), 
+				React.DOM.span(null, stop.rtArrTime)
 			)
 
 			);
@@ -384,7 +358,7 @@ var Station = React.createClass({displayName: 'Station',
 
 		return (
 			Link({to: "departure", params: station, query: station}, 
-				React.DOM.h3(null, station.name.split(',')[0]), 
+				React.DOM.h4(null, station.name.split(',')[0]), 
 				React.DOM.span(null, station.distance, " m")
 			)
 		);
@@ -416,6 +390,11 @@ var Stations = React.createClass({displayName: 'Stations',
 
 	componentDidMount: function() {
 		this._getStations();
+		intervalId = setInterval(this._getStations.bind(this), 5000);
+	},
+
+	componentWillUnmount: function() {
+		clearInterval(intervalId);
 	},
 
 	render: function() {
@@ -764,9 +743,9 @@ var DataStore = merge(EventEmitter.prototype, {
 		return this.location().then(req.stations).then(parseStations);
 	},
 
-	departures: function(stationName, stationId) {
-		setHeader(stationName);
-		return req.departures(stationId).then(parseDepartures);
+	departures: function(station, stationId) {
+		setHeader(station.name.split(',')[0] + ' (' + station.distance + 'm)');
+		return req.departures(station.id).then(parseDepartures);
 	},
 
 	journey: function(url) {

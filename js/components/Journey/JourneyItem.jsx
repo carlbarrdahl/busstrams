@@ -14,22 +14,11 @@ var StopItem = React.createClass({
 	render: function() {
 		var stop = this.props.stop;
 		console.log(stop)
-		var style = {
-			background: stop.current ? 'red' : 'black'
-		};
-
 
 		return (
 			<a>
-				<figure style={style}><span></span></figure>
-				<div className="col">
-					<div className="row">
-						<h4 className="col">{stop.name.split(',')[0]}</h4>
-						<div className="-time">
-							<span>{stop.rtArrTime}</span>
-						</div>
-					</div>
-				</div>
+				<h4>{stop.name.split(',')[0]}</h4>
+				<span>{stop.rtArrTime}</span>
 			</a>
 
 			);

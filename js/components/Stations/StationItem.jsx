@@ -19,7 +19,7 @@ var Station = React.createClass({
 
 		return (
 			<Link to="departure" params={station} query={station}>
-				<h3>{station.name.split(',')[0]}</h3>
+				<h4>{station.name.split(',')[0]}</h4>
 				<span>{station.distance} m</span>
 			</Link>
 		);

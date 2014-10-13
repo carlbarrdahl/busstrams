@@ -74,9 +74,9 @@ var DataStore = merge(EventEmitter.prototype, {
 		return this.location().then(req.stations).then(parseStations);
 	},
 
-	departures: function(stationName, stationId) {
-		setHeader(stationName);
-		return req.departures(stationId).then(parseDepartures);
+	departures: function(station, stationId) {
+		setHeader(station.name.split(',')[0] + ' (' + station.distance + 'm)');
+		return req.departures(station.id).then(parseDepartures);
 	},
 
 	journey: function(url) {

@@ -33,21 +33,6 @@ var DepartureItem = React.createClass({
 
 		var direction = departure.direction.split('via');
 
-
-		var listItems = [];
-		if (departure.accessibility) {
-			listItems.push(<li><Icon type={departure.accessibility || ''} /></li>);
-		}
-
-		if (direction[1]) {
-			listItems.push(<li>Via: {direction[1]}</li>);
-		}
-
-		if (departure.track) {
-			// listItems.push(<li>Läge <strong>{departure.track}</strong></li>);
-		}
-
-
 		return (
 			<Link to="journey" params={departure} query={departure.JourneyDetailRef}>
 				<figure style={style}><span>{departure.sname}</span></figure>

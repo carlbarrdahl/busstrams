@@ -23,14 +23,14 @@ var Journey = React.createClass({
 	render: function() {
 		var stopId = this.props.params.stopid;
 		var journey = this.state.journey;
-		console.log(journey);
+		console.log('journey', journey);
 
 		var stops = journey.map(function(stop) {
 			return <JourneyItem key={stop.id} stop={stop} />
 		});
 
 		return (
-			<CSSTransitionGroup transitionName="slideUp" className="Departures">
+			<CSSTransitionGroup transitionName="slideUp" className="Stations">
 				{stops}
 			</CSSTransitionGroup>
 		)
