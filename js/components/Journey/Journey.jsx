@@ -30,7 +30,7 @@ var Journey = React.createClass({
 		});
 
 		return (
-			<CSSTransitionGroup transitionName="slideUp" className="Journey">
+			<CSSTransitionGroup transitionName="slideUp" className="Departures">
 				{stops}
 			</CSSTransitionGroup>
 		)

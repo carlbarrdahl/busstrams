@@ -84,7 +84,7 @@ var Tram = React.createClass({displayName: 'Tram',
 		}
 
 		var icon = 'icon icon-' + type;
-		var src = '../../../assets/icons/' + type + '.svg';
+		var src = '../../assets/icons/' + type + '.svg';
 		return (isvg({className: icon, src: src}));
 	}
 
@@ -261,7 +261,7 @@ var Journey = React.createClass({displayName: 'Journey',
 		});
 
 		return (
-			CSSTransitionGroup({transitionName: "slideUp", className: "Journey"}, 
+			CSSTransitionGroup({transitionName: "slideUp", className: "Departures"}, 
 				stops
 			)
 		)
@@ -296,21 +296,22 @@ var StopItem = React.createClass({displayName: 'StopItem',
 		var style = {
 			background: stop.current ? 'red' : 'black'
 		};
+
+
 		return (
-	        React.DOM.a(null, 
+			React.DOM.a(null, 
 				React.DOM.figure({style: style}, React.DOM.span(null)), 
-				React.DOM.div(null, 
-					React.DOM.h3(null, stop.name), 
-					React.DOM.ol(null, 
-						React.DOM.li(null, stop.type), 
-						React.DOM.li(null, "Läge ", React.DOM.strong(null, stop.track)), 
-						React.DOM.li(null, stop.rtArrTime)
+				React.DOM.div({className: "col"}, 
+					React.DOM.div({className: "row"}, 
+						React.DOM.h4({className: "col"}, stop.name.split(',')[0]), 
+						React.DOM.div({className: "-time"}, 
+							React.DOM.span(null, stop.rtArrTime)
+						)
 					)
 				)
 			)
-			);
 
-		// {stop.name} {stop.depTime} {time.difference(stop.depTime, stop.rtDepTime)}
+			);
 	}
 
 });
@@ -319,21 +320,17 @@ module.exports = StopItem;
 
 
 /*
-
-
-<div class="list-group">
-	<div class="list-group-item">
-		<div class="row-action-primary">
-			<i class="icon-material-folder"></i>
-		</div>
-		<div class="row-content">
-			<div class="least-content">15m</div>
-			<h4 class="list-group-item-heading">Tile with a label</h4>
-			<p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus.</p>
-		</div>
-	</div>
-	<div class="list-group-separator"></div>
-</div>
+			<a>
+				<figure style={style}><span></span></figure>
+				<div>
+					<h3>{stop.name}</h3>
+					<ol>
+						<li>{stop.type}</li>
+						<li>Läge <strong>{stop.track}</strong></li>
+						<li>{stop.rtArrTime}</li>
+					</ol>
+				</div>
+			</a>
  */
 
 },{"react/addons":95}],8:[function(require,module,exports){
