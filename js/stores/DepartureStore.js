@@ -14,6 +14,7 @@ var DepartureStore = module.exports = Reflux.createStore({
 });
 
 function getDepartures(station) {
+	Actions.loading(true);
 	return Api.departures(station)
 		.then(emit)
 		.catch(function(err) {
@@ -23,6 +24,7 @@ function getDepartures(station) {
 
 
 function emit(departures) {
+	Actions.loading(false);
 	_departures.departures = departures;
 	DepartureStore.trigger(_departures);
 }

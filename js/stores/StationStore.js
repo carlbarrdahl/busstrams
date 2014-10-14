@@ -12,6 +12,8 @@ var StationStore = module.exports = Reflux.createStore({
 	},
 
 	getNearbyStations: function() {
+		Actions.loading(true);
+
 		Geo.getLocation()
 			.then(Api.stations)
 			.then(emit)
@@ -23,6 +25,7 @@ var StationStore = module.exports = Reflux.createStore({
 
 
 function emit(stations) {
+	Actions.loading(false);
 	_stations.stations = stations;
 	StationStore.trigger(_stations);
 }

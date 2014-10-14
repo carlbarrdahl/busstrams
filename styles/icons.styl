@@ -7,22 +7,19 @@
 	padding-left 2px
 
 .icon.icon-spinner svg
-	position absolute
-	left 50%
-	margin-left	-32px
-	top 60px
-	width 64px
-	height 64px
+	width 56px
+	height 56px
 
 	g path
 		transform-origin 50% 50%
 		transform translate3d(0, 0, 0)
 		backface-visibility hidden
 
+
+.icon.icon-spinner.loading svg
 	for $j in (1)..(8)
 		g path:nth-of-type({$j})
 			-webkit-animation spin_full 1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite
-
 
 
 @keyframes spin_full {

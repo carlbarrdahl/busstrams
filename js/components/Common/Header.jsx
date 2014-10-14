@@ -1,5 +1,7 @@
 var React = require('react');
 
+var Loader = require('./Loader.jsx');
+
 var Header = module.exports = React.createClass({
 
 	getInitialState: function() {
@@ -10,7 +12,10 @@ var Header = module.exports = React.createClass({
 
 	render: function() {
 		return (
-			<header className="Header">{this.state.header}</header>
+			<header className="Header">
+				<Loader />
+				{this.state.header}
+			</header>
 		);
 	}
 
