@@ -4,10 +4,11 @@ var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var Reflux = require('reflux');
 
+var Actions = require('../../actions/Actions');
 var StationStore = require('../../stores/StationStore');
 var StationItem = require('./StationItem.jsx');
 
-
+var intervalId;
 var Stations = module.exports = React.createClass({
 
 	mixins: [Reflux.ListenerMixin, PureRenderMixin],
@@ -20,7 +21,12 @@ var Stations = module.exports = React.createClass({
 
 	componentDidMount: function() {
 		this.listenTo(StationStore, this.setState);
-		StationStore.getNearbyStations();
+		intervalId = setInterval(Actions.getNearbyStations, 10000);
+		Actions.getNearbyStations();
+	},
+
+	componentWillUnmount: function() {
+		clearInterval(intervalId);
 	},
 
 	render: function() {

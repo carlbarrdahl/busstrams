@@ -189,6 +189,8 @@ function parseDepartures(departures) {
 
 },{"../../helpers/geo":14,"../../helpers/time":16}],6:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
+var Router = require('react-router');
+var Link = Router.Link;
 
 var Loader = require('./Loader.jsx');
 
@@ -203,7 +205,7 @@ var Header = module.exports = React.createClass({displayName: 'exports',
 	render: function() {
 		return (
 			React.DOM.header({className: "Header"}, 
-				Loader(null), 
+				Link({to: "stations"}, Loader(null)), 
 				this.state.header
 			)
 		);
@@ -211,7 +213,7 @@ var Header = module.exports = React.createClass({displayName: 'exports',
 
 });
 
-},{"./Loader.jsx":8,"react":256}],7:[function(require,module,exports){
+},{"./Loader.jsx":8,"react":256,"react-router":61}],7:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var PureRenderMixin = React.addons.PureRenderMixin;
 
@@ -345,10 +347,11 @@ var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var Reflux = require('reflux');
 
+var Actions = require('../../actions/Actions');
 var DepartureStore = require('../../stores/DepartureStore');
 var DepartureItem = require('./DepartureItem.jsx');
 
-
+var intervalId;
 var Departures = module.exports = React.createClass({displayName: 'exports',
 
 	mixins: [Reflux.ListenerMixin, PureRenderMixin],
@@ -362,7 +365,12 @@ var Departures = module.exports = React.createClass({displayName: 'exports',
 	componentDidMount: function() {
 		this.listenTo(DepartureStore, this.setState);
 
-		DepartureStore.getDepartures(this.props.query);
+		intervalId = setInterval(Actions.getDepartures.bind(this, this.props.query), 10000);
+		Actions.getDepartures(this.props.query);
+	},
+
+	componentWillUnmount: function() {
+		clearInterval(intervalId);
 	},
 
 	render: function() {
@@ -378,7 +386,7 @@ var Departures = module.exports = React.createClass({displayName: 'exports',
 	}
 });
 
-},{"../../stores/DepartureStore":17,"./DepartureItem.jsx":9,"react/addons":97,"reflux":265}],11:[function(require,module,exports){
+},{"../../actions/Actions":2,"../../stores/DepartureStore":17,"./DepartureItem.jsx":9,"react/addons":97,"reflux":265}],11:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
 var Header = require('./Common/Header.jsx');
 
@@ -441,10 +449,11 @@ var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var Reflux = require('reflux');
 
+var Actions = require('../../actions/Actions');
 var StationStore = require('../../stores/StationStore');
 var StationItem = require('./StationItem.jsx');
 
-
+var intervalId;
 var Stations = module.exports = React.createClass({displayName: 'exports',
 
 	mixins: [Reflux.ListenerMixin, PureRenderMixin],
@@ -457,7 +466,12 @@ var Stations = module.exports = React.createClass({displayName: 'exports',
 
 	componentDidMount: function() {
 		this.listenTo(StationStore, this.setState);
-		StationStore.getNearbyStations();
+		intervalId = setInterval(Actions.getNearbyStations, 10000);
+		Actions.getNearbyStations();
+	},
+
+	componentWillUnmount: function() {
+		clearInterval(intervalId);
 	},
 
 	render: function() {
@@ -473,7 +487,7 @@ var Stations = module.exports = React.createClass({displayName: 'exports',
 	}
 });
 
-},{"../../stores/StationStore":19,"./StationItem.jsx":12,"react/addons":97,"reflux":265}],14:[function(require,module,exports){
+},{"../../actions/Actions":2,"../../stores/StationStore":19,"./StationItem.jsx":12,"react/addons":97,"reflux":265}],14:[function(require,module,exports){
 var options = {
 	enableHighAccuracy: true,
 	maximumAge: 30000,
