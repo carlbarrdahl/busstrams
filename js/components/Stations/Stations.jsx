@@ -1,15 +1,16 @@
 var React = require('react/addons');
+var PureRenderMixin = React.addons.PureRenderMixin;
 var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
-var DataStore = require('../../stores/DataStore');
+var Reflux = require('reflux');
+
+var StationStore = require('../../stores/StationStore');
 var StationItem = require('./StationItem.jsx');
 
-var PureRenderMixin = React.addons.PureRenderMixin;
 
-var intervalId;
-var Stations = React.createClass({
+var Stations = module.exports = React.createClass({
 
-	mixins: [PureRenderMixin],
+	mixins: [Reflux.ListenerMixin, PureRenderMixin],
 
 	getInitialState: function() {
 		return {
@@ -18,17 +19,11 @@ var Stations = React.createClass({
 	},
 
 	componentDidMount: function() {
-		this._getStations();
-		intervalId = setInterval(this._getStations.bind(this), 5000);
-	},
-
-	componentWillUnmount: function() {
-		clearInterval(intervalId);
+		this.listenTo(StationStore, this.setState);
+		StationStore.getNearbyStations();
 	},
 
 	render: function() {
-		var stations = [];
-
 		var stations = this.state.stations.map(function(station) {
 			return <StationItem key={station.id} station={station} />;
 		});
@@ -38,11 +33,5 @@ var Stations = React.createClass({
 				{stations}
 			</CSSTransitionGroup>
 		)
-	},
-
-	_getStations: function() {
-		DataStore.stations().then(this.setState.bind(this));
 	}
 });
-
-module.exports = Stations

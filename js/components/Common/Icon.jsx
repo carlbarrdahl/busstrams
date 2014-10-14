@@ -3,20 +3,21 @@ var PureRenderMixin = React.addons.PureRenderMixin;
 
 var isvg = require('react-inlinesvg');
 
-var Tram = React.createClass({
+var Icon = module.exports = React.createClass({
 
 	mixins: [PureRenderMixin],
 
 	render: function() {
-		if (!(type = this.props.type.toLowerCase())) {
+		var type = this.props.type.toLowerCase();
+
+		if (!type) {
 			return null;
 		}
 
 		var icon = 'icon icon-' + type;
 		var src = '../../assets/icons/' + type + '.svg';
+
 		return (<isvg className={icon} src={src}></isvg>);
 	}
 
 });
-
-module.exports = Tram;
