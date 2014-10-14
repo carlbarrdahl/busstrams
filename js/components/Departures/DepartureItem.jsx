@@ -1,3 +1,25 @@
+/*
+
+DepartureItem
+
+{
+	sname: vehicalNumber,
+	direction: endStation,
+	via: via,
+	type: vehicleType,
+	track: track,
+	timestamps: {
+		next: nextArrivesIn,
+		after: afterArrivesIn
+	},
+	style: {
+		color: '#000',
+		backgroundColor: '#fff'
+	}
+}
+
+ */
+
 var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
 var Router = require('react-router');
@@ -6,10 +28,9 @@ var Link = Router.Link;
 var PureRenderMixin = React.addons.PureRenderMixin;
 
 var Icon = require('../Common/Icon.jsx');
+var DepartureStore = require('../../stores/DepartureStore');
 
-var DataStore = require('../../stores/DataStore');
-
-var DepartureItem = React.createClass({
+var DepartureItem = module.exports = React.createClass({
 
 	mixins: [PureRenderMixin],
 
@@ -18,60 +39,28 @@ var DepartureItem = React.createClass({
 	},
 
 	render: function() {
-		console.log('DepartureItem', this.props.departure);
 		var departure = this.props.departure;
 
-		var style = {
-			backgroundColor: departure.fgColor,
-			color: departure.bgColor
-		};
-
-		var departureTimes = {
-			next: DataStore.getDepartureIn(departure.rtTime),
-			after: DataStore.getDepartureIn(departure.rtNext)
-		};
-
-		var direction = departure.direction.split('via');
-
 		return (
-			<Link to="journey" params={departure} query={departure.JourneyDetailRef}>
-				<figure style={style}><span>{departure.sname}</span></figure>
+			<a>
+				<figure style={departure.style}><span>{departure.sname}</span></figure>
 				<div className="col">
 					<div className="row">
-						<h4 className="col"><Icon type={departure.type} /> {direction[0]}</h4>
+						<h4 className="col"><Icon type={departure.type} /> {departure.direction}</h4>
 						<div className="-time">
-							<span>{departureTimes.next}</span>
-							<span>{departureTimes.after}</span>
+							<span>{departure.timestamps.next}</span>
+							<span>{departure.timestamps.after}</span>
 						</div>
 					</div>
 					<div className="-meta row">
 						<div className="col">
-							<Icon type={departure.accessibility || ''} />
-							{direction[1] ? 'Via' + direction[1] : ''}
+							{departure.via ? 'Via: ' + departure.via : ''}
 						</div>
 						<div className="-track">Läge {departure.track}</div>
 					</div>
 				</div>
-			</Link>
+			</a>
 		);
 	}
 
 });
-
-module.exports = DepartureItem;
-
-/*
-			<Link to="journey" params={departure} query={departure.JourneyDetailRef}>
-				<figure style={style}><span>{departure.sname}</span></figure>
-				<section>
-					<header>
-						<h3><Icon type={departure.type} /> {direction[0]} </h3>
-						<div>
-							<span>{departureTimes.next}</span>
-							<span>{departureTimes.after}</span>
-						</div>
-					</header>
-					<ol>{listItems}</ol>
-				</section>
-			</Link>
- */

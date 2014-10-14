@@ -1,40 +1,17 @@
 var React = require('react');
 
-var DataStore = require('../../stores/DataStore');
-
-function getHeader() {
-	return {
-		header: DataStore.getHeader()
-	};
-}
-
-var Header = React.createClass({
+var Header = module.exports = React.createClass({
 
 	getInitialState: function() {
 		return {
-			header: 'Header'
+			header: 'Avgång'
 		};
 	},
 
-	componentDidMount: function() {
-		DataStore.addChangeListener(this._onChange);
-	},
-
-	componentWillUnmount: function() {
-		DataStore.removeChangeListener(this._onChange);
-	},
-
 	render: function() {
-		var header = this.state.header;
 		return (
-			<header className="Header">{header}</header>
+			<header className="Header">{this.state.header}</header>
 		);
-	},
-
-	_onChange: function() {
-		this.setState(getHeader());
 	}
 
 });
-
-module.exports = Header;

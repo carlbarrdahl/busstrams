@@ -15,11 +15,10 @@ var Station = React.createClass({
 
 	render: function() {
 		var station = this.props.station;
-		console.log(station)
 
 		return (
 			<Link to="departure" params={station} query={station}>
-				<h4>{station.name.split(',')[0]}</h4>
+				<h4>{station.name}</h4>
 				<span>{station.distance} m</span>
 			</Link>
 		);

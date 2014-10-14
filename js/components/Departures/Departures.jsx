@@ -2,13 +2,15 @@ var React = require('react/addons');
 var PureRenderMixin = React.addons.PureRenderMixin;
 var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
-var DataStore = require('../../stores/DataStore');
+var Reflux = require('reflux');
+
+var DepartureStore = require('../../stores/DepartureStore');
 var DepartureItem = require('./DepartureItem.jsx');
 
 
-var Departures = React.createClass({
+var Departures = module.exports = React.createClass({
 
-	mixins: [PureRenderMixin],
+	mixins: [Reflux.ListenerMixin, PureRenderMixin],
 
 	getInitialState: function() {
 		return {
@@ -17,7 +19,9 @@ var Departures = React.createClass({
 	},
 
 	componentDidMount: function() {
-		this._getDepartures();
+		this.listenTo(DepartureStore, this.setState);
+
+		DepartureStore.getDepartures(this.props.query);
 	},
 
 	render: function() {
@@ -30,11 +34,5 @@ var Departures = React.createClass({
 				{departures}
 			</CSSTransitionGroup>
 		)
-	},
-
-	_getDepartures: function() {
-		DataStore.departures(this.props.query).then(this.setState.bind(this));
 	}
 });
-
-module.exports = Departures;

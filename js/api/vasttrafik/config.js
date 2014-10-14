@@ -24,9 +24,5 @@ module.exports = {
 			useRegTrain: 0,
 			exludeDR: 0
 		}
-	},
-
-	journey: {
-
 	}
 };

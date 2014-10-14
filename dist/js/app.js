@@ -9,7 +9,6 @@ var Link = Router.Link;
 
 var Stations = require('./components/Stations/Stations.jsx');
 var Departures = require('./components/Departures/Departures.jsx');
-var Journey = require('./components/Journey/Journey.jsx');
 var MainApp = require('./components/MainApp.jsx');
 
 React.initializeTouchEvents(true);
@@ -18,82 +17,243 @@ var routes = (
   Routes(null, 
 	Route({handler: MainApp}, 
 		Route({name: "stations", path: "/", handler: Stations}), 
-		Route({name: "departure", path: "departure/:id", handler: Departures}), 
-		Route({name: "journey", path: "journey/:stopid", handler: Journey})
+		Route({name: "departure", path: "departure/:id", handler: Departures})
 	)
   )
 );
 
 React.renderComponent(routes, document.body);
 
-},{"./components/Departures/Departures.jsx":5,"./components/Journey/Journey.jsx":6,"./components/MainApp.jsx":8,"./components/Stations/Stations.jsx":10,"react":254,"react-router":59}],2:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react');
+},{"./components/Departures/Departures.jsx":9,"./components/MainApp.jsx":10,"./components/Stations/Stations.jsx":12,"react":254,"react-router":59}],2:[function(require,module,exports){
+var Reflux = require('reflux');
 
-var DataStore = require('../../stores/DataStore');
+var StationActions = module.exports = Reflux.createActions([
+	'getNearbyStations',
+	'getDepartures'
+]);
 
-function getHeader() {
-	return {
-		header: DataStore.getHeader()
-	};
+},{"reflux":263}],3:[function(require,module,exports){
+module.exports = {
+	api: {
+		baseUrl: '//api.vasttrafik.se/bin/rest.exe/',
+		defaults: {
+			authKey: '766216d3-f113-40f3-9242-5396fc7e71d9',
+			format: 'json'
+		}
+	},
+
+	stations: {
+		service: 'location.nearbystops',
+		defaults: {
+			maxNo: 50
+		}
+	},
+
+	departures: {
+		service: 'departureBoard',
+		defaults: {
+			maxDeparturesPerLine: 2,
+			timeSpan: 60,
+			useLDTrain: 0,
+			useVas: 0,
+			useRegTrain: 0,
+			exludeDR: 0
+		}
+	}
+};
+
+},{}],4:[function(require,module,exports){
+var merge = require('react/lib/merge');
+var config = require('./config');
+
+var Parser = require('./parser');
+var Request = require('../../helpers/request');
+
+var Vasttrafik = module.exports = {
+
+	stations: function(position) {
+		return Request.get(buildUrl('stations', Parser.coords(position))).then(Parser.stations);
+	},
+
+	departures: function(station) {
+		return Request.get(buildUrl('departures', station)).then(Parser.departures);
+	}
+
+};
+
+function buildUrl(type, data) {
+	var defaults = merge(config.api.defaults, config[type].defaults);
+	return config.api.baseUrl + config[type].service + '?' + Request.serialize(merge(defaults, data));
 }
 
-var Header = React.createClass({displayName: 'Header',
+},{"../../helpers/request":14,"./config":3,"./parser":5,"react/lib/merge":239}],5:[function(require,module,exports){
+var Geo = require('../../helpers/geo');
+var Time = require('../../helpers/time');
+
+var Parser = module.exports = {
+
+	coords: function(position) {
+		return {
+			originCoordLat: position.coords.latitude,
+			originCoordLong: position.coords.longitude
+		};
+	},
+	stations: function(data) {
+		// FIXME: find a better way to handle servertime
+		_serverTime = data.LocationList.servertime;
+
+		return parseStations(data.LocationList.StopLocation);
+	},
+
+	departures: function(data) {
+		// FIXME: find a better way to handle servertime
+		_serverTime = data.DepartureBoard.servertime;
+
+		return parseDepartures(sortDepartures(data.DepartureBoard.Departure));
+	}
+
+};
+
+
+/**
+ * Parse stations and return the expected data structure
+ * @param  {Array} stations Array of stations
+ * @return {Array} stations Parsed stations
+ */
+function parseStations(stations) {
+	return stations.filter(function(station) {
+		if (!station.track) {
+			var position = {
+				latitude: station.lat,
+				longitude: station.lon
+			};
+			station.name = station.name.split(',')[0];
+			station.distance = Geo.distance(position, Geo.position().coords);
+			return station.distance;
+		}
+	});
+}
+
+
+/**
+ * Sort departures by realtime arrival
+ * @param  {Array} departures Array of departures
+ * @return {Array} departures Sorted departures
+ */
+function sortDepartures(departures) {
+	return departures.sort(function(a, b) {
+		return new Date('1970/01/01 ' + (a.rtTime || a.time)) - new Date('1970/01/01 ' + (b.rtTime || b.time));
+	});
+}
+
+/**
+ * Parse departures and return the expected data structure
+ * @param  {Array} departures Array of departures
+ * @return {Array} departures Parsed departures
+ */
+function parseDepartures(departures) {
+	var tmp = {};
+
+	departures.forEach(function(d) {
+		var direction = d.direction.split(', ');
+		var ns = d.sname + '_' + direction[0];
+
+		if (!tmp[ns]) {
+			tmp[ns] = {
+				sname: d.sname,
+				direction: direction[0],
+				via: direction[1],
+				type: d.type,
+				track: d.track,
+				timestamps: {
+					next: Time.difference(d.rtTime, _serverTime),
+					after: null
+				},
+				style: {
+					backgroundColor: d.fgColor,
+					color: d.bgColor
+				}
+			};
+		} else {
+			tmp[ns].timestamps.after = Time.difference(d.rtTime, _serverTime);
+		}
+
+
+	});
+
+	return Object.keys(tmp).map(function(key) {
+		return tmp[key];
+	});
+}
+
+},{"../../helpers/geo":13,"../../helpers/time":15}],6:[function(require,module,exports){
+/** @jsx React.DOM */var React = require('react');
+
+var Header = module.exports = React.createClass({displayName: 'exports',
 
 	getInitialState: function() {
 		return {
-			header: 'Header'
+			header: 'Avgång'
 		};
 	},
 
-	componentDidMount: function() {
-		DataStore.addChangeListener(this._onChange);
-	},
-
-	componentWillUnmount: function() {
-		DataStore.removeChangeListener(this._onChange);
-	},
-
 	render: function() {
-		var header = this.state.header;
 		return (
-			React.DOM.header({className: "Header"}, header)
+			React.DOM.header({className: "Header"}, this.state.header)
 		);
-	},
-
-	_onChange: function() {
-		this.setState(getHeader());
 	}
 
 });
 
-module.exports = Header;
-
-},{"../../stores/DataStore":17,"react":254}],3:[function(require,module,exports){
+},{"react":254}],7:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var PureRenderMixin = React.addons.PureRenderMixin;
 
 var isvg = require('react-inlinesvg');
 
-var Tram = React.createClass({displayName: 'Tram',
+var Icon = module.exports = React.createClass({displayName: 'exports',
 
 	mixins: [PureRenderMixin],
 
 	render: function() {
-		if (!(type = this.props.type.toLowerCase())) {
+		var type = this.props.type.toLowerCase();
+
+		if (!type) {
 			return null;
 		}
 
 		var icon = 'icon icon-' + type;
 		var src = '../../assets/icons/' + type + '.svg';
+
 		return (isvg({className: icon, src: src}));
 	}
 
 });
 
-module.exports = Tram;
+},{"react-inlinesvg":38,"react/addons":95}],8:[function(require,module,exports){
+/** @jsx React.DOM *//*
 
-},{"react-inlinesvg":38,"react/addons":95}],4:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react/addons');
+DepartureItem
+
+{
+	sname: vehicalNumber,
+	direction: endStation,
+	via: via,
+	type: vehicleType,
+	track: track,
+	timestamps: {
+		next: nextArrivesIn,
+		after: afterArrivesIn
+	},
+	style: {
+		color: '#000',
+		backgroundColor: '#fff'
+	}
+}
+
+ */
+
+var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
 var Router = require('react-router');
 var Link = Router.Link;
@@ -101,10 +261,9 @@ var Link = Router.Link;
 var PureRenderMixin = React.addons.PureRenderMixin;
 
 var Icon = require('../Common/Icon.jsx');
+var DepartureStore = require('../../stores/DepartureStore');
 
-var DataStore = require('../../stores/DataStore');
-
-var DepartureItem = React.createClass({displayName: 'DepartureItem',
+var DepartureItem = module.exports = React.createClass({displayName: 'exports',
 
 	mixins: [PureRenderMixin],
 
@@ -113,36 +272,22 @@ var DepartureItem = React.createClass({displayName: 'DepartureItem',
 	},
 
 	render: function() {
-		console.log('DepartureItem', this.props.departure);
 		var departure = this.props.departure;
 
-		var style = {
-			backgroundColor: departure.fgColor,
-			color: departure.bgColor
-		};
-
-		var departureTimes = {
-			next: DataStore.getDepartureIn(departure.rtTime),
-			after: DataStore.getDepartureIn(departure.rtNext)
-		};
-
-		var direction = departure.direction.split('via');
-
 		return (
-			Link({to: "journey", params: departure, query: departure.JourneyDetailRef}, 
-				React.DOM.figure({style: style}, React.DOM.span(null, departure.sname)), 
+			React.DOM.a(null, 
+				React.DOM.figure({style: departure.style}, React.DOM.span(null, departure.sname)), 
 				React.DOM.div({className: "col"}, 
 					React.DOM.div({className: "row"}, 
-						React.DOM.h4({className: "col"}, Icon({type: departure.type}), " ", direction[0]), 
+						React.DOM.h4({className: "col"}, Icon({type: departure.type}), " ", departure.direction), 
 						React.DOM.div({className: "-time"}, 
-							React.DOM.span(null, departureTimes.next), 
-							React.DOM.span(null, departureTimes.after)
+							React.DOM.span(null, departure.timestamps.next), 
+							React.DOM.span(null, departure.timestamps.after)
 						)
 					), 
 					React.DOM.div({className: "-meta row"}, 
 						React.DOM.div({className: "col"}, 
-							Icon({type: departure.accessibility || ''}), 
-							direction[1] ? 'Via' + direction[1] : ''
+							departure.via ? 'Via: ' + departure.via : ''
 						), 
 						React.DOM.div({className: "-track"}, "Läge ", departure.track)
 					)
@@ -153,36 +298,20 @@ var DepartureItem = React.createClass({displayName: 'DepartureItem',
 
 });
 
-module.exports = DepartureItem;
-
-/*
-			<Link to="journey" params={departure} query={departure.JourneyDetailRef}>
-				<figure style={style}><span>{departure.sname}</span></figure>
-				<section>
-					<header>
-						<h3><Icon type={departure.type} /> {direction[0]} </h3>
-						<div>
-							<span>{departureTimes.next}</span>
-							<span>{departureTimes.after}</span>
-						</div>
-					</header>
-					<ol>{listItems}</ol>
-				</section>
-			</Link>
- */
-
-},{"../../stores/DataStore":17,"../Common/Icon.jsx":3,"react-router":59,"react/addons":95}],5:[function(require,module,exports){
+},{"../../stores/DepartureStore":16,"../Common/Icon.jsx":7,"react-router":59,"react/addons":95}],9:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var PureRenderMixin = React.addons.PureRenderMixin;
 var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
-var DataStore = require('../../stores/DataStore');
+var Reflux = require('reflux');
+
+var DepartureStore = require('../../stores/DepartureStore');
 var DepartureItem = require('./DepartureItem.jsx');
 
 
-var Departures = React.createClass({displayName: 'Departures',
+var Departures = module.exports = React.createClass({displayName: 'exports',
 
-	mixins: [PureRenderMixin],
+	mixins: [Reflux.ListenerMixin, PureRenderMixin],
 
 	getInitialState: function() {
 		return {
@@ -191,7 +320,9 @@ var Departures = React.createClass({displayName: 'Departures',
 	},
 
 	componentDidMount: function() {
-		this._getDepartures();
+		this.listenTo(DepartureStore, this.setState);
+
+		DepartureStore.getDepartures(this.props.query);
 	},
 
 	render: function() {
@@ -204,110 +335,10 @@ var Departures = React.createClass({displayName: 'Departures',
 				departures
 			)
 		)
-	},
-
-	_getDepartures: function() {
-		DataStore.departures(this.props.query).then(this.setState.bind(this));
 	}
 });
 
-module.exports = Departures;
-
-},{"../../stores/DataStore":17,"./DepartureItem.jsx":4,"react/addons":95}],6:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react/addons');
-var PureRenderMixin = React.addons.PureRenderMixin;
-var CSSTransitionGroup = React.addons.CSSTransitionGroup;
-
-var DataStore = require('../../stores/DataStore');
-var JourneyItem = require('./JourneyItem.jsx');
-
-
-var Journey = React.createClass({displayName: 'Journey',
-
-	mixins: [PureRenderMixin],
-
-	getInitialState: function() {
-		return {
-			journey: []
-		};
-	},
-
-	componentDidMount: function() {
-		this._getJourney();
-	},
-
-	render: function() {
-		var stopId = this.props.params.stopid;
-		var journey = this.state.journey;
-		console.log('journey', journey);
-
-		var stops = journey.map(function(stop) {
-			return JourneyItem({key: stop.id, stop: stop})
-		});
-
-		return (
-			CSSTransitionGroup({transitionName: "slideUp", className: "Stations"}, 
-				stops
-			)
-		)
-	},
-
-	_getJourney: function() {
-		DataStore.journey(this.props.query.ref).then(this.setState.bind(this));
-	}
-
-});
-
-module.exports = Journey;
-
-
-},{"../../stores/DataStore":17,"./JourneyItem.jsx":7,"react/addons":95}],7:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react/addons');
-var ReactPropTypes = React.PropTypes;
-
-var PureRenderMixin = React.addons.PureRenderMixin;
-
-var StopItem = React.createClass({displayName: 'StopItem',
-
-	mixins: [PureRenderMixin],
-
-	propTypes: {
-		stop: ReactPropTypes.object.isRequired
-	},
-
-	render: function() {
-		var stop = this.props.stop;
-		console.log(stop)
-
-		return (
-			React.DOM.a(null, 
-				React.DOM.h4(null, stop.name.split(',')[0]), 
-				React.DOM.span(null, stop.rtArrTime)
-			)
-
-			);
-	}
-
-});
-
-module.exports = StopItem;
-
-
-/*
-			<a>
-				<figure style={style}><span></span></figure>
-				<div>
-					<h3>{stop.name}</h3>
-					<ol>
-						<li>{stop.type}</li>
-						<li>Läge <strong>{stop.track}</strong></li>
-						<li>{stop.rtArrTime}</li>
-					</ol>
-				</div>
-			</a>
- */
-
-},{"react/addons":95}],8:[function(require,module,exports){
+},{"../../stores/DepartureStore":16,"./DepartureItem.jsx":8,"react/addons":95,"reflux":263}],10:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
 
 var Header = require('./Common/Header.jsx');
@@ -336,7 +367,7 @@ var MainApp = React.createClass({displayName: 'MainApp',
 module.exports = MainApp;
 
 
-},{"./Common/Header.jsx":2,"./Common/Icon.jsx":3,"react":254}],9:[function(require,module,exports){
+},{"./Common/Header.jsx":6,"./Common/Icon.jsx":7,"react":254}],11:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
 var Router = require('react-router');
@@ -354,11 +385,10 @@ var Station = React.createClass({displayName: 'Station',
 
 	render: function() {
 		var station = this.props.station;
-		console.log(station)
 
 		return (
 			Link({to: "departure", params: station, query: station}, 
-				React.DOM.h4(null, station.name.split(',')[0]), 
+				React.DOM.h4(null, station.name), 
 				React.DOM.span(null, station.distance, " m")
 			)
 		);
@@ -368,19 +398,20 @@ var Station = React.createClass({displayName: 'Station',
 
 module.exports = Station;
 
-},{"react-router":59,"react/addons":95}],10:[function(require,module,exports){
+},{"react-router":59,"react/addons":95}],12:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
+var PureRenderMixin = React.addons.PureRenderMixin;
 var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
-var DataStore = require('../../stores/DataStore');
+var Reflux = require('reflux');
+
+var StationStore = require('../../stores/StationStore');
 var StationItem = require('./StationItem.jsx');
 
-var PureRenderMixin = React.addons.PureRenderMixin;
 
-var intervalId;
-var Stations = React.createClass({displayName: 'Stations',
+var Stations = module.exports = React.createClass({displayName: 'exports',
 
-	mixins: [PureRenderMixin],
+	mixins: [Reflux.ListenerMixin, PureRenderMixin],
 
 	getInitialState: function() {
 		return {
@@ -389,17 +420,11 @@ var Stations = React.createClass({displayName: 'Stations',
 	},
 
 	componentDidMount: function() {
-		this._getStations();
-		intervalId = setInterval(this._getStations.bind(this), 5000);
-	},
-
-	componentWillUnmount: function() {
-		clearInterval(intervalId);
+		this.listenTo(StationStore, this.setState);
+		StationStore.getNearbyStations();
 	},
 
 	render: function() {
-		var stations = [];
-
 		var stations = this.state.stations.map(function(station) {
 			return StationItem({key: station.id, station: station});
 		});
@@ -409,79 +434,21 @@ var Stations = React.createClass({displayName: 'Stations',
 				stations
 			)
 		)
-	},
-
-	_getStations: function() {
-		DataStore.stations().then(this.setState.bind(this));
 	}
 });
 
-module.exports = Stations
-
-},{"../../stores/DataStore":17,"./StationItem.jsx":9,"react/addons":95}],11:[function(require,module,exports){
-module.exports = {
-	api: {
-		baseUrl: '//api.vasttrafik.se/bin/rest.exe/',
-		defaults: {
-			authKey: '766216d3-f113-40f3-9242-5396fc7e71d9',
-			format: 'json'
-		}
-	},
-
-	stations: {
-		service: 'location.nearbystops',
-		defaults: {
-			maxNo: 50
-		}
-	},
-
-	departures: {
-		service: 'departureBoard',
-		defaults: {
-			maxDeparturesPerLine: 2,
-			timeSpan: 60,
-			useLDTrain: 0,
-			useVas: 0,
-			useRegTrain: 0,
-			exludeDR: 0
-		}
-	},
-
-	journey: {
-
-	}
-};
-
-},{}],12:[function(require,module,exports){
-var Dispatcher = require('flux').Dispatcher;
-
-var copyProperties = require('react/lib/copyProperties');
-
-var AppDispatcher = copyProperties(new Dispatcher(), {
-
-    handleViewAction: function(action) {
-        this.dispatch({
-            source: 'VIEW_ACTION',
-            action: action
-        });
-    }
-});
-
-module.exports = AppDispatcher;
-
-},{"flux":34,"react/lib/copyProperties":205}],13:[function(require,module,exports){
-var earthRadius = 6371000;
+},{"../../stores/StationStore":17,"./StationItem.jsx":11,"react/addons":95,"reflux":263}],13:[function(require,module,exports){
 var options = {
 	enableHighAccuracy: true,
 	maximumAge: 30000,
 	timeout: 27000
 };
 
+var _position = {};
 
-var _lastPosition;
-var Geo = {
-	position: function(position) {
-		return position ? (_lastPosition = position) : _lastPosition;
+var Geo = module.exports = {
+	position: function(newPos) {
+		return newPos ? (_position = newPos) : _position;
 	},
 
 	getLocation: function() {
@@ -500,139 +467,52 @@ var Geo = {
 		var lat2Rad = end.latitude * Math.PI / 180;
 		var a = Math.sin(latDelta / 2) * Math.sin(latDelta / 2) + Math.sin(lonDelta / 2) * Math.sin(lonDelta / 2) * Math.cos(lat1Rad) * Math.cos(lat2Rad);
 		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		var distance = earthRadius * c;
+		var distance = 6371000 * c;
 
 		return Math.round(distance);
 	}
 };
 
-module.exports = Geo;
-
 },{}],14:[function(require,module,exports){
-var moment = require('moment');
-var geo = require('../geo');
-
-
-var Parser = {
-	stations: function(data) {
-		return data.LocationList.StopLocation.filter(function(station) {
-			if (!station.track) {
-				var position = {
-					latitude: station.lat,
-					longitude: station.lon
-				};
-				station.distance = geo.distance(position, geo.position().coords);
-				return station.distance;
-			}
-		});
-	},
-
-	departures: function(data) {
-		var departures = data.DepartureBoard.Departure.sort(function(a, b) {
-			if (!a.rtTime || !b.rtTime) {
-				console.error('No rtTime in ', a, b);
-			}
-			return new Date('1970/01/01 ' + a.rtTime) - new Date('1970/01/01 ' + b.rtTime);
-		});
-
-		return groupDepartures(departures);
-	},
-
-	journey: function(data) {
-		return data.JourneyDetail.Stop.filter(function(stop) {
-			if (stop.rtArrTime) {
-				return stop;
-			}
-		});
-	}
-};
-
-function groupDepartures(departures) {
-	var tmp = {};
-
-	for (var i = 0; i < departures.length; i++) {
-		var d = departures[i];
-
-		if (tmp[d.sname + '_' + d.direction]) {
-			tmp[d.sname + '_' + d.direction].rtNext = d.rtTime;
-		} else {
-			tmp[d.sname + '_' + d.direction] = d;
-		}
-	}
-
-	return Object.keys(tmp).map(function(key) {
-		return tmp[key];
-	});
-}
-
-module.exports = Parser;
-
-},{"../geo":13,"moment":37}],15:[function(require,module,exports){
 require('es6-promise').polyfill();
 
-var merge = require('react/lib/merge');
-var config = require('../../config.js');
+var Request = module.exports = {
+	get: function(url) {
+		return new Promise(function(resolve, reject) {
+				var callbackName = 'jsonpCallback' + Math.round(100000 * Math.random());
+				var script = createScript(url, callbackName);
 
-var Request = {
-	stations: function(data) {
-		var coords = {
-			originCoordLat: data.coords.latitude,
-			originCoordLong: data.coords.longitude
-		};
-		return req(url('stations', coords));
+				// If we fail to get the script, reject the promise.
+				script.onerror = reject;
+
+				document.body.appendChild(script);
+				// If the url contains a 'something_callback=?' then
+				// replace the '?' with our random generated callbackName.
+				if (/Callback=?/.test(url)) {
+					url = url.replace('=?', '=' + callbackName);
+				}
+
+				window[callbackName] = function(data) {
+					// Script inserted, resolve promise.
+					resolve(data);
+
+					// Clean up.
+					window[callbackName] = null;
+					delete window[callbackName];
+					document.body.removeChild(script);
+				};
+			});
 	},
 
-	departures: function(stationId) {
-		return req(url('departures', {
-			id: stationId
-		}));
-	},
-
-	journey: function(url) {
-		return req(url);
+	serialize: function(obj) {
+		var str = [];
+		for (var p in obj)
+			if (obj.hasOwnProperty(p)) {
+				str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+		}
+		return str.join("&");
 	}
 };
-
-function url(type, data) {
-	var defaults = merge(config.api.defaults, config[type].defaults);
-	return config.api.baseUrl + config[type].service + '?' + serialize(merge(defaults, data));
-}
-
-function serialize(obj) {
-	var str = [];
-	for (var p in obj)
-		if (obj.hasOwnProperty(p)) {
-			str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-	}
-	return str.join("&");
-}
-
-function req(url) {
-	return new Promise(function(resolve, reject) {
-			var callbackName = 'jsonpCallback' + Math.round(100000 * Math.random());
-			var script = createScript(url, callbackName);
-
-			// If we fail to get the script, reject the promise.
-			script.onerror = reject;
-
-			document.body.appendChild(script);
-			// If the url contains a 'something_callback=?' then
-			// replace the '?' with our random generated callbackName.
-			if (/Callback=?/.test(url)) {
-				url = url.replace('=?', '=' + callbackName);
-			}
-
-			window[callbackName] = function(data) {
-				// Script inserted, resolve promise.
-				resolve(data);
-
-				// Clean up.
-				window[callbackName] = null;
-				delete window[callbackName];
-				document.body.removeChild(script);
-			};
-		});
-}
 
 function createScript(url, callbackName) {
 	var script = document.createElement('script');
@@ -641,10 +521,7 @@ function createScript(url, callbackName) {
 	return script;
 }
 
-
-module.exports = Request;
-
-},{"../../config.js":11,"es6-promise":24,"react/lib/merge":239}],16:[function(require,module,exports){
+},{"es6-promise":24}],15:[function(require,module,exports){
 var moment = require('moment');
 var Time = {
 	difference: function(start, end) {
@@ -666,125 +543,75 @@ function toMinutes(time) {
 	return 60 * hours + minutes;
 }
 
-},{"moment":37}],17:[function(require,module,exports){
-var AppDispatcher = require('../dispatcher/AppDispatcher');
-var EventEmitter = require('events').EventEmitter;
+},{"moment":37}],16:[function(require,module,exports){
+var Reflux = require('reflux');
 
-var moment = require('moment');
+var Actions = require('../actions/Actions');
+var Api = require('../api/vasttrafik');
 
-var merge = require('react/lib/merge');
-var geo = require('../helpers/geo');
-var parse = require('../helpers/parse');
-var req = require('../helpers/request');
-var time = require('../helpers/time');
+var _departures = {};
 
-var CHANGE_EVENT = 'change';
+var DepartureStore = module.exports = Reflux.createStore({
+	init: function() {
+		this.listenTo(Actions.getDepartures, getDepartures);
+	},
 
-var _header;
+	getDepartures: getDepartures
+});
 
-var _stations = [];
-var _departures = [];
-var _journey = [];
-
-var _serverTime;
-
-function setServerTime(time) {
-	return (_serverTime = time);
+function getDepartures(station) {
+	return Api.departures(station)
+		.then(emit)
+		.catch(function(err) {
+			console.error(err);
+		});
 }
 
-function parseStations(data) {
-	console.log('parseStations', data);
 
-	setServerTime(data.LocationList.servertime);
-
-	_stations = parse.stations(data);
-
-	return {
-		stations: _stations
-	};
+function emit(departures) {
+	_departures.departures = departures;
+	DepartureStore.trigger(_departures);
 }
 
-function parseDepartures(data) {
-	console.log('parseDepartures', data);
+DepartureStore.listen(function(departures) {
+	console.log('Storing departures...', departures);
+});
 
-	setServerTime(data.DepartureBoard.servertime);
+},{"../actions/Actions":2,"../api/vasttrafik":4,"reflux":263}],17:[function(require,module,exports){
+var Reflux = require('reflux');
 
-	_departures = parse.departures(data);
+var Actions = require('../actions/Actions');
+var Geo = require('../helpers/geo');
+var Api = require('../api/vasttrafik');
 
-	return {
-		departures: _departures
-	};
-}
+var _stations = {};
 
-function parseJourney(data) {
-	console.log('parseJourney', data);
-
-	setServerTime(data.JourneyDetail.servertime);
-
-	_journey = parse.journey(data);
-
-	return {
-		journey: _journey
-	};
-}
-
-function setHeader(value) {
-	_header = value;
-	DataStore.emitChange();
-}
-
-var DataStore = merge(EventEmitter.prototype, {
-	location: function() {
-		return geo.getLocation();
+var StationStore = module.exports = Reflux.createStore({
+	init: function() {
+		this.listenTo(Actions.getNearbyStations, this.getNearbyStations);
 	},
 
-	stations: function() {
-		setHeader('Avgång');
-		return this.location().then(req.stations).then(parseStations);
-	},
-
-	departures: function(station, stationId) {
-		setHeader(station.name.split(',')[0] + ' (' + station.distance + 'm)');
-		return req.departures(station.id).then(parseDepartures);
-	},
-
-	journey: function(url) {
-		url.replace('http:', '');
-		return req.journey(url).then(parseJourney);
-	},
-
-	getDepartureIn: function(departure) {
-		return time.difference(departure, _serverTime);
-	},
-
-	emitChange: function() {
-		this.emit(CHANGE_EVENT);
-	},
-
-	addChangeListener: function(callback) {
-		this.on(CHANGE_EVENT, callback);
-	},
-
-	removeChangeListener: function(callback) {
-		this.removeListener(CHANGE_EVENT, callback);
-	},
-
-	getHeader: function() {
-		return _header;
+	getNearbyStations: function() {
+		Geo.getLocation()
+			.then(Api.stations)
+			.then(emit)
+			.catch(function(err) {
+				console.error(err);
+			});
 	}
 });
 
-AppDispatcher.register(function(payload) {
-	var action = payload.action;
 
-	DataStore.emitChange();
+function emit(stations) {
+	_stations.stations = stations;
+	StationStore.trigger(_stations);
+}
 
-	return true;
+StationStore.listen(function(stations) {
+	console.log('Storing stations...', stations);
 });
 
-module.exports = DataStore;
-
-},{"../dispatcher/AppDispatcher":12,"../helpers/geo":13,"../helpers/parse":14,"../helpers/request":15,"../helpers/time":16,"events":22,"moment":37,"react/lib/merge":239}],18:[function(require,module,exports){
+},{"../actions/Actions":2,"../api/vasttrafik":4,"../helpers/geo":13,"reflux":263}],18:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -31161,4 +30988,877 @@ module.exports = warning;
 },{"./emptyFunction":211,"_process":23}],254:[function(require,module,exports){
 module.exports = require('./lib/React');
 
-},{"./lib/React":124}]},{},[1]);
+},{"./lib/React":124}],255:[function(require,module,exports){
+'use strict';
+
+/**
+ * Representation of a single EventEmitter function.
+ *
+ * @param {Function} fn Event handler to be called.
+ * @param {Mixed} context Context for function execution.
+ * @param {Boolean} once Only emit once
+ * @api private
+ */
+function EE(fn, context, once) {
+  this.fn = fn;
+  this.context = context;
+  this.once = once || false;
+}
+
+/**
+ * Minimal EventEmitter interface that is molded against the Node.js
+ * EventEmitter interface.
+ *
+ * @constructor
+ * @api public
+ */
+function EventEmitter() { /* Nothing to set */ }
+
+/**
+ * Holds the assigned EventEmitters by name.
+ *
+ * @type {Object}
+ * @private
+ */
+EventEmitter.prototype._events = undefined;
+
+/**
+ * Return a list of assigned event listeners.
+ *
+ * @param {String} event The events that should be listed.
+ * @returns {Array}
+ * @api public
+ */
+EventEmitter.prototype.listeners = function listeners(event) {
+  if (!this._events || !this._events[event]) return [];
+
+  for (var i = 0, l = this._events[event].length, ee = []; i < l; i++) {
+    ee.push(this._events[event][i].fn);
+  }
+
+  return ee;
+};
+
+/**
+ * Emit an event to all registered event listeners.
+ *
+ * @param {String} event The name of the event.
+ * @returns {Boolean} Indication if we've emitted an event.
+ * @api public
+ */
+EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+  if (!this._events || !this._events[event]) return false;
+
+  var listeners = this._events[event]
+    , length = listeners.length
+    , len = arguments.length
+    , ee = listeners[0]
+    , args
+    , i, j;
+
+  if (1 === length) {
+    if (ee.once) this.removeListener(event, ee.fn, true);
+
+    switch (len) {
+      case 1: return ee.fn.call(ee.context), true;
+      case 2: return ee.fn.call(ee.context, a1), true;
+      case 3: return ee.fn.call(ee.context, a1, a2), true;
+      case 4: return ee.fn.call(ee.context, a1, a2, a3), true;
+      case 5: return ee.fn.call(ee.context, a1, a2, a3, a4), true;
+      case 6: return ee.fn.call(ee.context, a1, a2, a3, a4, a5), true;
+    }
+
+    for (i = 1, args = new Array(len -1); i < len; i++) {
+      args[i - 1] = arguments[i];
+    }
+
+    ee.fn.apply(ee.context, args);
+  } else {
+    for (i = 0; i < length; i++) {
+      if (listeners[i].once) this.removeListener(event, listeners[i].fn, true);
+
+      switch (len) {
+        case 1: listeners[i].fn.call(listeners[i].context); break;
+        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
+        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
+        default:
+          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
+            args[j - 1] = arguments[j];
+          }
+
+          listeners[i].fn.apply(listeners[i].context, args);
+      }
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Register a new EventListener for the given event.
+ *
+ * @param {String} event Name of the event.
+ * @param {Functon} fn Callback function.
+ * @param {Mixed} context The context of the function.
+ * @api public
+ */
+EventEmitter.prototype.on = function on(event, fn, context) {
+  if (!this._events) this._events = {};
+  if (!this._events[event]) this._events[event] = [];
+  this._events[event].push(new EE( fn, context || this ));
+
+  return this;
+};
+
+/**
+ * Add an EventListener that's only called once.
+ *
+ * @param {String} event Name of the event.
+ * @param {Function} fn Callback function.
+ * @param {Mixed} context The context of the function.
+ * @api public
+ */
+EventEmitter.prototype.once = function once(event, fn, context) {
+  if (!this._events) this._events = {};
+  if (!this._events[event]) this._events[event] = [];
+  this._events[event].push(new EE(fn, context || this, true ));
+
+  return this;
+};
+
+/**
+ * Remove event listeners.
+ *
+ * @param {String} event The event we want to remove.
+ * @param {Function} fn The listener that we need to find.
+ * @param {Boolean} once Only remove once listeners.
+ * @api public
+ */
+EventEmitter.prototype.removeListener = function removeListener(event, fn, once) {
+  if (!this._events || !this._events[event]) return this;
+
+  var listeners = this._events[event]
+    , events = [];
+
+  if (fn) for (var i = 0, length = listeners.length; i < length; i++) {
+    if (listeners[i].fn !== fn && listeners[i].once !== once) {
+      events.push(listeners[i]);
+    }
+  }
+
+  //
+  // Reset the array, or remove it completely if we have no more listeners.
+  //
+  if (events.length) this._events[event] = events;
+  else this._events[event] = null;
+
+  return this;
+};
+
+/**
+ * Remove all listeners or only the listeners for the specified event.
+ *
+ * @param {String} event The event want to remove all listeners for.
+ * @api public
+ */
+EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+  if (!this._events) return this;
+
+  if (event) this._events[event] = null;
+  else this._events = {};
+
+  return this;
+};
+
+//
+// Alias methods names because people roll like that.
+//
+EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+
+//
+// This function doesn't apply anymore.
+//
+EventEmitter.prototype.setMaxListeners = function setMaxListeners() {
+  return this;
+};
+
+//
+// Expose the module.
+//
+EventEmitter.EventEmitter = EventEmitter;
+EventEmitter.EventEmitter2 = EventEmitter;
+EventEmitter.EventEmitter3 = EventEmitter;
+
+if ('object' === typeof module && module.exports) {
+  module.exports = EventEmitter;
+}
+
+},{}],256:[function(require,module,exports){
+exports.createdStores = [];
+
+exports.createdActions = [];
+
+exports.reset = function() {
+    while(exports.createdStores.length) {
+        exports.createdStores.pop();
+    }
+    while(exports.createdActions.length) {
+        exports.createdActions.pop();
+    }
+};
+
+},{}],257:[function(require,module,exports){
+var _ = require('./utils'),
+    maker = require('./joins').instanceJoinCreator;
+
+/**
+ * A module of methods related to listening.
+ */
+module.exports = {
+
+    /**
+     * An internal utility function used by `validateListening`
+     *
+     * @param {Action|Store} listenable The listenable we want to search for
+     * @returns {Boolean} The result of a recursive search among `this.subscriptions`
+     */
+    hasListener: function(listenable) {
+        var i = 0,
+            listener;
+        for (;i < (this.subscriptions||[]).length; ++i) {
+            listener = this.subscriptions[i].listenable;
+            if (listener === listenable || listener.hasListener && listener.hasListener(listenable)) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    /**
+     * A convenience method that listens to all listenables in the given object.
+     *
+     * @param {Object} listenables An object of listenables. Keys will be used as callback method names.
+     */
+    listenToMany: function(listenables){
+        for(var key in listenables){
+            var cbname = _.callbackName(key),
+                localname = this[cbname] ? cbname : this[key] ? key : undefined;
+            if (localname){
+                this.listenTo(listenables[key],localname,this[cbname+"Default"]||this[localname+"Default"]||localname);
+            }
+        }
+    },
+
+    /**
+     * Checks if the current context can listen to the supplied listenable
+     *
+     * @param {Action|Store} listenable An Action or Store that should be
+     *  listened to.
+     * @returns {String|Undefined} An error message, or undefined if there was no problem.
+     */
+    validateListening: function(listenable){
+        if (listenable === this) {
+            return "Listener is not able to listen to itself";
+        }
+        if (!_.isFunction(listenable.listen)) {
+            return listenable + " is missing a listen method";
+        }
+        if (listenable.hasListener && listenable.hasListener(this)) {
+            return "Listener cannot listen to this listenable because of circular loop";
+        }
+    },
+
+    /**
+     * Sets up a subscription to the given listenable for the context object
+     *
+     * @param {Action|Store} listenable An Action or Store that should be
+     *  listened to.
+     * @param {Function|String} callback The callback to register as event handler
+     * @param {Function|String} defaultCallback The callback to register as default handler
+     * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
+     */
+    listenTo: function(listenable, callback, defaultCallback) {
+        var desub, unsubscriber, subscriptionobj, subs = this.subscriptions = this.subscriptions || [];
+        _.throwIf(this.validateListening(listenable));
+        this.fetchDefaultData(listenable, defaultCallback);
+        desub = listenable.listen(this[callback]||callback, this);
+        unsubscriber = function() {
+            var index = subs.indexOf(subscriptionobj);
+            _.throwIf(index === -1,'Tried to remove listen already gone from subscriptions list!');
+            subs.splice(index, 1);
+            desub();
+        };
+        subscriptionobj = {
+            stop: unsubscriber,
+            listenable: listenable
+        };
+        subs.push(subscriptionobj);
+        return subscriptionobj;
+    },
+
+    /**
+     * Stops listening to a single listenable
+     *
+     * @param {Action|Store} listenable The action or store we no longer want to listen to
+     * @returns {Boolean} True if a subscription was found and removed, otherwise false.
+     */
+    stopListeningTo: function(listenable){
+        var sub, i = 0, subs = this.subscriptions || [];
+        for(;i < subs.length; i++){
+            sub = subs[i];
+            if (sub.listenable === listenable){
+                sub.stop();
+                _.throwIf(subs.indexOf(sub)!==-1,'Failed to remove listen from subscriptions list!');
+                return true;
+            }
+        }
+        return false;
+    },
+
+    /**
+     * Stops all subscriptions and empties subscriptions array
+     */
+    stopListeningToAll: function(){
+        var remaining, subs = this.subscriptions || [];
+        while((remaining=subs.length)){
+            subs[0].stop();
+            _.throwIf(subs.length!==remaining-1,'Failed to remove listen from subscriptions list!');
+        }
+    },
+
+    /**
+     * Used in `listenTo`. Fetches initial data from a publisher if it has a `getDefaultData` method.
+     * @param {Action|Store} listenable The publisher we want to get default data from
+     * @param {Function|String} defaultCallback The method to receive the data
+     */
+    fetchDefaultData: function (listenable, defaultCallback) {
+        defaultCallback = (defaultCallback && this[defaultCallback]) || defaultCallback;
+        var me = this;
+        if (_.isFunction(defaultCallback) && _.isFunction(listenable.getDefaultData)) {
+            data = listenable.getDefaultData();
+            if (data && _.isFunction(data.then)) {
+                data.then(function() {
+                    defaultCallback.apply(me, arguments);
+                });
+            } else {
+                defaultCallback.call(this, data);
+            }
+        }
+    },
+
+    /**
+     * The callback will be called once all listenables have triggered at least once.
+     * It will be invoked with the last emission from each listenable.
+     * @param {...Publishers} publishers Publishers that should be tracked.
+     * @param {Function|String} callback The method to call when all publishers have emitted
+     */
+    joinTrailing: maker("last"),
+
+    /**
+     * The callback will be called once all listenables have triggered at least once.
+     * It will be invoked with the first emission from each listenable.
+     * @param {...Publishers} publishers Publishers that should be tracked.
+     * @param {Function|String} callback The method to call when all publishers have emitted
+     */
+    joinLeading: maker("first"),
+
+    /**
+     * The callback will be called once all listenables have triggered at least once.
+     * It will be invoked with all emission from each listenable.
+     * @param {...Publishers} publishers Publishers that should be tracked.
+     * @param {Function|String} callback The method to call when all publishers have emitted
+     */
+    joinConcat: maker("all"),
+
+    /**
+     * The callback will be called once all listenables have triggered.
+     * If a callback triggers twice before that happens, an error is thrown.
+     * @param {...Publishers} publishers Publishers that should be tracked.
+     * @param {Function|String} callback The method to call when all publishers have emitted
+     */
+    joinStrict: maker("strict"),
+};
+
+
+},{"./joins":264,"./utils":267}],258:[function(require,module,exports){
+var _ = require('./utils'),
+    ListenerMethods = require('./ListenerMethods');
+
+/**
+ * A module meant to be consumed as a mixin by a React component. Supplies the methods from
+ * `ListenerMethods` mixin and takes care of teardown of subscriptions.
+ */
+module.exports = _.extend({
+
+    /**
+     * Cleans up all listener previously registered.
+     */
+    componentWillUnmount: ListenerMethods.stopListeningToAll
+
+}, ListenerMethods);
+
+},{"./ListenerMethods":257,"./utils":267}],259:[function(require,module,exports){
+var _ = require('./utils');
+
+/**
+ * A module of methods for object that you want to be able to listen to.
+ * This module is consumed by `createStore` and `createAction`
+ */
+module.exports = {
+
+    /**
+     * Hook used by the publisher that is invoked before emitting
+     * and before `shouldEmit`. The arguments are the ones that the action
+     * is invoked with. If this function returns something other than
+     * undefined, that will be passed on as arguments for shouldEmit and
+     * emission.
+     */
+    preEmit: function() {},
+
+    /**
+     * Hook used by the publisher after `preEmit` to determine if the
+     * event should be emitted with given arguments. This may be overridden
+     * in your application, default implementation always returns true.
+     *
+     * @returns {Boolean} true if event should be emitted
+     */
+    shouldEmit: function() { return true; },
+
+    /**
+     * Subscribes the given callback for action triggered
+     *
+     * @param {Function} callback The callback to register as event handler
+     * @param {Mixed} [optional] bindContext The context to bind the callback with
+     * @returns {Function} Callback that unsubscribes the registered event handler
+     */
+    listen: function(callback, bindContext) {
+        var eventHandler = function(args) {
+            callback.apply(bindContext, args);
+        }, me = this;
+        this.emitter.addListener(this.eventLabel, eventHandler);
+        return function() {
+            me.emitter.removeListener(me.eventLabel, eventHandler);
+        };
+    },
+
+    /**
+     * Publishes an event using `this.emitter` (if `shouldEmit` agrees)
+     */
+    trigger: function() {
+        var args = arguments,
+            pre = this.preEmit.apply(this, args);
+        args = pre === undefined ? args : _.isArguments(pre) ? pre : [].concat(pre);
+        if (this.shouldEmit.apply(this, args)) {
+            this.emitter.emit(this.eventLabel, args);
+        }
+    },
+
+    /**
+     * Tries to publish the event on the next tick
+     */
+    triggerAsync: function(){
+        var args = arguments,me = this;
+        _.nextTick(function() {
+            me.trigger.apply(me, args);
+        });
+    }
+};
+
+},{"./utils":267}],260:[function(require,module,exports){
+var Reflux = require('../src'),
+    _ = require('./utils');
+
+module.exports = function(listenable,key){
+    return {
+        componentDidMount: function(){
+            for(var m in Reflux.ListenerMethods){
+                if (this[m] !== Reflux.ListenerMethods[m]){
+                    if (this[m]){
+                        throw "Can't have other property '"+m+"' when using Reflux.listenTo!";
+                    }
+                    this[m] = Reflux.ListenerMethods[m];
+                }
+            }
+            var me = this, cb = (key === undefined ? this.setState : function(v){me.setState(_.object([key],[v]));});
+            this.listenTo(listenable,cb,cb);
+        },
+        componentWillUnmount: Reflux.ListenerMixin.componentWillUnmount
+    };
+};
+
+},{"../src":263,"./utils":267}],261:[function(require,module,exports){
+var _ = require('./utils'),
+    Reflux = require('../src'),
+    Keep = require('./Keep'),
+    allowed = {preEmit:1,shouldEmit:1};
+
+/**
+ * Creates an action functor object. It is mixed in with functions
+ * from the `PublisherMethods` mixin. `preEmit` and `shouldEmit` may
+ * be overridden in the definition object.
+ *
+ * @param {Object} definition The action object definition
+ */
+module.exports = function(definition) {
+
+    definition = definition || {};
+
+    for(var d in definition){
+        if (!allowed[d] && Reflux.PublisherMethods[d]) {
+            throw new Error("Cannot override API method " + d +
+                " in action creation. Use another method name or override it on Reflux.PublisherMethods instead."
+            );
+        }
+    }
+
+    var context = _.extend({
+        eventLabel: "action",
+        emitter: new _.EventEmitter(),
+        _isAction: true
+    },Reflux.PublisherMethods,definition);
+
+    var functor = function() {
+        functor[functor.sync?"trigger":"triggerAsync"].apply(functor, arguments);
+    };
+
+    _.extend(functor,context);
+
+    Keep.createdActions.push(functor);
+
+    return functor;
+
+};
+
+},{"../src":263,"./Keep":256,"./utils":267}],262:[function(require,module,exports){
+var _ = require('./utils'),
+    Reflux = require('../src'),
+    Keep = require('./Keep'),
+    allowed = {preEmit:1,shouldEmit:1};
+
+/**
+ * Creates an event emitting Data Store. It is mixed in with functions
+ * from the `ListenerMethods` and `PublisherMethods` mixins. `preEmit`
+ * and `shouldEmit` may be overridden in the definition object.
+ *
+ * @param {Object} definition The data store object definition
+ * @returns {Store} A data store instance
+ */
+module.exports = function(definition) {
+
+    definition = definition || {};
+
+    for(var d in definition){
+        if (!allowed[d] && (Reflux.PublisherMethods[d] || Reflux.ListenerMethods[d])){
+            throw new Error("Cannot override API method " + d + 
+                " in store creation. Use another method name or override it on Reflux.PublisherMethods / Reflux.ListenerMethods instead."
+            );
+        }
+    }
+
+    function Store() {
+        var i=0, arr;
+        this.subscriptions = [];
+        this.emitter = new _.EventEmitter();
+        this.eventLabel = "change";
+        if (this.init && _.isFunction(this.init)) {
+            this.init();
+        }
+        if (this.listenables){
+            arr = [].concat(this.listenables);
+            for(;i < arr.length;i++){
+                this.listenToMany(arr[i]);
+            }
+        }
+    }
+
+    _.extend(Store.prototype, Reflux.ListenerMethods, Reflux.PublisherMethods, definition);
+
+    var store = new Store();
+    Keep.createdStores.push(store);
+
+    return store;
+};
+
+},{"../src":263,"./Keep":256,"./utils":267}],263:[function(require,module,exports){
+exports.ListenerMethods = require('./ListenerMethods');
+
+exports.PublisherMethods = require('./PublisherMethods');
+
+exports.createAction = require('./createAction');
+
+exports.createStore = require('./createStore');
+
+exports.connect = require('./connect');
+
+exports.ListenerMixin = require('./ListenerMixin');
+
+exports.listenTo = require('./listenTo');
+
+exports.listenToMany = require('./listenToMany');
+
+
+var maker = require('./joins').staticJoinCreator;
+
+exports.joinTrailing = exports.all = maker("last"); // Reflux.all alias for backward compatibility
+
+exports.joinLeading = maker("first");
+
+exports.joinStrict = maker("strict");
+
+exports.joinConcat = maker("all");
+
+
+/**
+ * Convenience function for creating a set of actions
+ *
+ * @param actionNames the names for the actions to be created
+ * @returns an object with actions of corresponding action names
+ */
+exports.createActions = function(actionNames) {
+    var i = 0, actions = {};
+    for (; i < actionNames.length; i++) {
+        actions[actionNames[i]] = exports.createAction();
+    }
+    return actions;
+};
+
+/**
+ * Sets the eventmitter that Reflux uses
+ */
+exports.setEventEmitter = function(ctx) {
+    var _ = require('./utils');
+    _.EventEmitter = ctx;
+};
+
+/**
+ * Sets the method used for deferring actions and stores
+ */
+exports.nextTick = function(nextTick) {
+    var _ = require('./utils');
+    _.nextTick = nextTick;
+};
+
+/**
+ * Provides the set of created actions and stores for introspection
+ */
+exports.__keep = require('./Keep');
+
+},{"./Keep":256,"./ListenerMethods":257,"./ListenerMixin":258,"./PublisherMethods":259,"./connect":260,"./createAction":261,"./createStore":262,"./joins":264,"./listenTo":265,"./listenToMany":266,"./utils":267}],264:[function(require,module,exports){
+/**
+ * Internal module used to create static and instance join methods
+ */
+
+var slice = Array.prototype.slice,
+    createStore = require("./createStore"),
+    strategyMethodNames = {
+        strict: "joinStrict",
+        first: "joinLeading",
+        last: "joinTrailing",
+        all: "joinConcat"
+    };
+
+/**
+ * Used in `index.js` to create the static join methods
+ * @param {String} strategy Which strategy to use when tracking listenable trigger arguments
+ * @returns {Function} A static function which returns a store with a join listen on the given listenables using the given strategy
+ */
+exports.staticJoinCreator = function(strategy){
+    return function(/* listenables... */) {
+        var listenables = slice.call(arguments);
+        return createStore({
+            init: function(){
+                this[strategyMethodNames[strategy]].apply(this,listenables.concat("triggerAsync"));
+            }
+        });
+    };
+};
+
+/**
+ * Used in `ListenerMethods.js` to create the instance join methods
+ * @param {String} strategy Which strategy to use when tracking listenable trigger arguments
+ * @returns {Function} An instance method which sets up a join listen on the given listenables using the given strategy
+ */
+exports.instanceJoinCreator = function(strategy){
+    return function(/* listenables..., callback*/){
+        var listenables = slice.call(arguments),
+            callback = listenables.pop(),
+            numberOfListenables = listenables.length,
+            join = {
+                numberOfListenables: numberOfListenables,
+                callback: this[callback]||callback,
+                listener: this,
+                strategy: strategy
+            };
+        for (var i = 0; i < numberOfListenables; i++) {
+            this.listenTo(listenables[i],newListener(i,join));
+        }
+        reset(join);
+    };
+};
+
+// ---- internal join functions ----
+
+function reset(join) {
+    join.listenablesEmitted = new Array(join.numberOfListenables);
+    join.args = new Array(join.numberOfListenables);
+}
+
+function newListener(i,join) {
+    return function() {
+        var callargs = slice.call(arguments);
+        if (join.listenablesEmitted[i]){
+            switch(join.strategy){
+                case "strict": throw new Error("Strict join failed because listener triggered twice.");
+                case "last": join.args[i] = callargs; break;
+                case "all": join.args[i].push(callargs);
+            }
+        } else {
+            join.listenablesEmitted[i] = true;
+            join.args[i] = (join.strategy==="all"?[callargs]:callargs);
+        }
+        emitIfAllListenablesEmitted(join);
+    };
+}
+
+function emitIfAllListenablesEmitted(join) {
+    for (var i = 0; i < join.numberOfListenables; i++) {
+        if (!join.listenablesEmitted[i]) {
+            return;
+        }
+    }
+    join.callback.apply(join.listener,join.args);
+    reset(join);
+}
+
+},{"./createStore":262}],265:[function(require,module,exports){
+var Reflux = require('../src');
+
+
+/**
+ * A mixin factory for a React component. Meant as a more convenient way of using the `ListenerMixin`,
+ * without having to manually set listeners in the `componentDidMount` method.
+ *
+ * @param {Action|Store} listenable An Action or Store that should be
+ *  listened to.
+ * @param {Function|String} callback The callback to register as event handler
+ * @param {Function|String} defaultCallback The callback to register as default handler
+ * @returns {Object} An object to be used as a mixin, which sets up the listener for the given listenable.
+ */
+module.exports = function(listenable,callback,initial){
+    return {
+        /**
+         * Set up the mixin before the initial rendering occurs. Import methods from `ListenerMethods`
+         * and then make the call to `listenTo` with the arguments provided to the factory function
+         */
+        componentDidMount: function() {
+            for(var m in Reflux.ListenerMethods){
+                if (this[m] !== Reflux.ListenerMethods[m]){
+                    if (this[m]){
+                        throw "Can't have other property '"+m+"' when using Reflux.listenTo!";
+                    }
+                    this[m] = Reflux.ListenerMethods[m];
+                }
+            }
+            this.listenTo(listenable,callback,initial);
+        },
+        /**
+         * Cleans up all listener previously registered.
+         */
+        componentWillUnmount: Reflux.ListenerMethods.stopListeningToAll
+    };
+};
+
+},{"../src":263}],266:[function(require,module,exports){
+var Reflux = require('../src');
+
+/**
+ * A mixin factory for a React component. Meant as a more convenient way of using the `listenerMixin`,
+ * without having to manually set listeners in the `componentDidMount` method. This version is used
+ * to automatically set up a `listenToMany` call.
+ *
+ * @param {Object} listenables An object of listenables
+ * @returns {Object} An object to be used as a mixin, which sets up the listeners for the given listenables.
+ */
+module.exports = function(listenables){
+    return {
+        /**
+         * Set up the mixin before the initial rendering occurs. Import methods from `ListenerMethods`
+         * and then make the call to `listenTo` with the arguments provided to the factory function
+         */
+        componentDidMount: function() {
+            for(var m in Reflux.ListenerMethods){
+                if (this[m] !== Reflux.ListenerMethods[m]){
+                    if (this[m]){
+                        throw "Can't have other property '"+m+"' when using Reflux.listenToMany!";
+                    }
+                    this[m] = Reflux.ListenerMethods[m];
+                }
+            }
+            this.listenToMany(listenables);
+        },
+        /**
+         * Cleans up all listener previously registered.
+         */
+        componentWillUnmount: Reflux.ListenerMethods.stopListeningToAll
+    };
+};
+
+},{"../src":263}],267:[function(require,module,exports){
+/*
+ * isObject, extend, isFunction, isArguments are taken from undescore/lodash in
+ * order to remove the dependency
+ */
+var isObject = exports.isObject = function(obj) {
+    var type = typeof obj;
+    return type === 'function' || type === 'object' && !!obj;
+};
+
+exports.extend = function(obj) {
+    if (!isObject(obj)) {
+        return obj;
+    }
+    var source, prop;
+    for (var i = 1, length = arguments.length; i < length; i++) {
+        source = arguments[i];
+        for (prop in source) {
+            obj[prop] = source[prop];
+        }
+    }
+    return obj;
+};
+
+exports.isFunction = function(value) {
+    return typeof value === 'function';
+};
+
+exports.EventEmitter = require('eventemitter3');
+
+exports.nextTick = function(callback) {
+    setTimeout(callback, 0);
+};
+
+exports.callbackName = function(string){
+    return "on"+string.charAt(0).toUpperCase()+string.slice(1);
+};
+
+exports.object = function(keys,vals){
+    var o={}, i=0;
+    for(;i<keys.length;i++){
+        o[keys[i]] = vals[i];
+    }
+    return o;
+};
+
+exports.isArguments = function(value) {
+    return value && typeof value == 'object' && typeof value.length == 'number' &&
+      (toString.call(value) === '[object Arguments]' || (hasOwnProperty.call(value, 'callee' && !propertyIsEnumerable.call(value, 'callee')))) || false;
+};
+
+exports.throwIf = function(val,msg){
+    if (val){
+        throw Error(msg||val);
+    }
+};
+
+},{"eventemitter3":255}]},{},[1]);

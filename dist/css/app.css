@@ -355,15 +355,11 @@ main {
   text-overflow: ellipsis;
 }
 .Departures a .-meta {
-  font-size: 60%;
+  font-size: 70%;
 }
 .Departures a .-meta .-track {
-  width: 50px;
   text-align: center;
   padding-top: 6px;
-}
-.Departures a .-time {
-  width: 50px;
 }
 .Departures a .-time span {
   display: inline-block;
@@ -371,10 +367,10 @@ main {
 .Departures a .-time span:nth-child(1) {
   width: 25px;
   text-align: right;
-  padding-right: 10px;
+  padding-right: 6px;
 }
 .Departures a .-time span:nth-child(2) {
-  font-size: 60%;
+  font-size: 50%;
 }
 .Journey a {
   display: flex;
