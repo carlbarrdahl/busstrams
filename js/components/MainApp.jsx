@@ -1,6 +1,8 @@
 var React = require('react');
 var Header = require('./Common/Header.jsx');
 
+var Omnibutton = require('./Common/Omnibutton.jsx');
+
 var MainApp = React.createClass({
 	getInitialState: function() {
 		return {
@@ -12,6 +14,7 @@ var MainApp = React.createClass({
 		return (
 			<main>
 				<Header />
+				<Omnibutton />
 				<section className="content"><this.props.activeRouteHandler /></section>
 			</main>
 		);

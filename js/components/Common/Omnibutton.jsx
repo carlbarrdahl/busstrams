@@ -7,7 +7,7 @@ var LoadingStore = require('../../stores/LoadingStore');
 
 var isvg = require('react-inlinesvg');
 
-var Icon = module.exports = React.createClass({
+var Omnibutton = module.exports = React.createClass({
 
 	mixins: [Reflux.ListenerMixin, PureRenderMixin],
 
@@ -26,7 +26,15 @@ var Icon = module.exports = React.createClass({
 		var icon = 'icon icon-spinner' + (this.state.loading ? ' loading' : '');
 		var src = '../../assets/icons/spinner.svg';
 
-		return (<isvg className={icon} src={src}></isvg>);
+		return (
+			<div className="Omnibutton" onTouchStart={this._handleOnTouchStart}>
+				<isvg className={icon} src={src}></isvg>
+			</div>
+			);
+	},
+
+	_handleOnTouchStart: function(e) {
+		console.log(e)
 	}
 
 });

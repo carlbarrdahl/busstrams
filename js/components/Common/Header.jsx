@@ -2,8 +2,6 @@ var React = require('react');
 var Router = require('react-router');
 var Link = Router.Link;
 
-var Loader = require('./Loader.jsx');
-
 var Header = module.exports = React.createClass({
 
 	getInitialState: function() {
@@ -15,7 +13,6 @@ var Header = module.exports = React.createClass({
 	render: function() {
 		return (
 			<header className="Header">
-				<Link to="stations"><Loader /></Link>
 				{this.state.header}
 			</header>
 		);

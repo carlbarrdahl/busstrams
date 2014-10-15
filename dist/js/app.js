@@ -192,8 +192,6 @@ function parseDepartures(departures) {
 var Router = require('react-router');
 var Link = Router.Link;
 
-var Loader = require('./Loader.jsx');
-
 var Header = module.exports = React.createClass({displayName: 'exports',
 
 	getInitialState: function() {
@@ -205,7 +203,6 @@ var Header = module.exports = React.createClass({displayName: 'exports',
 	render: function() {
 		return (
 			React.DOM.header({className: "Header"}, 
-				Link({to: "stations"}, Loader(null)), 
 				this.state.header
 			)
 		);
@@ -213,7 +210,7 @@ var Header = module.exports = React.createClass({displayName: 'exports',
 
 });
 
-},{"./Loader.jsx":8,"react":256,"react-router":61}],7:[function(require,module,exports){
+},{"react":256,"react-router":61}],7:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var PureRenderMixin = React.addons.PureRenderMixin;
 
@@ -248,7 +245,7 @@ var LoadingStore = require('../../stores/LoadingStore');
 
 var isvg = require('react-inlinesvg');
 
-var Icon = module.exports = React.createClass({displayName: 'exports',
+var Omnibutton = module.exports = React.createClass({displayName: 'exports',
 
 	mixins: [Reflux.ListenerMixin, PureRenderMixin],
 
@@ -267,7 +264,15 @@ var Icon = module.exports = React.createClass({displayName: 'exports',
 		var icon = 'icon icon-spinner' + (this.state.loading ? ' loading' : '');
 		var src = '../../assets/icons/spinner.svg';
 
-		return (isvg({className: icon, src: src}));
+		return (
+			React.DOM.div({className: "Omnibutton", onTouchStart: this._handleOnTouchStart}, 
+				isvg({className: icon, src: src})
+			)
+			);
+	},
+
+	_handleOnTouchStart: function(e) {
+		console.log(e)
 	}
 
 });
@@ -390,6 +395,8 @@ var Departures = module.exports = React.createClass({displayName: 'exports',
 /** @jsx React.DOM */var React = require('react');
 var Header = require('./Common/Header.jsx');
 
+var Omnibutton = require('./Common/Omnibutton.jsx');
+
 var MainApp = React.createClass({displayName: 'MainApp',
 	getInitialState: function() {
 		return {
@@ -401,6 +408,7 @@ var MainApp = React.createClass({displayName: 'MainApp',
 		return (
 			React.DOM.main(null, 
 				Header(null), 
+				Omnibutton(null), 
 				React.DOM.section({className: "content"}, this.props.activeRouteHandler(null))
 			)
 		);
@@ -411,7 +419,7 @@ var MainApp = React.createClass({displayName: 'MainApp',
 module.exports = MainApp;
 
 
-},{"./Common/Header.jsx":6,"react":256}],12:[function(require,module,exports){
+},{"./Common/Header.jsx":6,"./Common/Omnibutton.jsx":8,"react":256}],12:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
 var Router = require('react-router');
