@@ -11,9 +11,11 @@ var Header = module.exports = React.createClass({
 	},
 
 	render: function() {
+		// var title = 'Avgång';
+		var title = this.props.current.name || 'Avgång';
 		return (
 			<header className="Header">
-				{this.state.header}
+				{title}
 			</header>
 		);
 	}

@@ -5,7 +5,7 @@ var Time = {
 			return '-';
 		}
 		var diff = toMinutes(start) - toMinutes(end);
-		return diff > 0 ? diff : 'Nu';
+		return diff < 0 ? 0 : diff;
 	}
 };
 

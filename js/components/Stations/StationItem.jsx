@@ -1,13 +1,9 @@
 var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
-var Router = require('react-router');
-var Link = Router.Link;
 
-var PureRenderMixin = React.addons.PureRenderMixin;
+var Actions = require('../../actions/Actions');
 
 var Station = React.createClass({
-
-	mixins: [PureRenderMixin],
 
 	propTypes: {
 		station: ReactPropTypes.object.isRequired
@@ -17,11 +13,25 @@ var Station = React.createClass({
 		var station = this.props.station;
 
 		return (
-			<Link to="departure" params={station} query={station}>
+			<a onClick={this._handleClick}>
 				<h4>{station.name}</h4>
 				<span>{station.distance} m</span>
-			</Link>
+			</a>
 		);
+	},
+
+	_handleClick: function(e) {
+
+		// TODO: Create a custom Router to handle this stuff
+
+		if (document.body.className === 'departures') {
+			Actions.clearDepartures();
+			return document.body.className = 'stations';
+		}
+
+		Actions.getDepartures(this.props.station);
+		document.body.className = 'departures'
+		document.body.scrollTop = 0;
 	}
 
 });

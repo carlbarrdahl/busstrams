@@ -1,0 +1,25 @@
+.Stations, .Departures
+	transition .3s
+	position absolute
+	width 100%
+	background #fff
+
+
+
+body.stations
+	.Departures
+		transform translate3d(0, -110%, 0);
+
+body.departures
+	.Stations
+		opacity .3
+
+	.Omnibutton
+		// top 0
+
+		.icon.icon-spinner svg
+			g path:nth-of-type(odd)
+				opacity 0
+
+			g path:nth-of-type(even)
+				transform: rotate(-90deg)

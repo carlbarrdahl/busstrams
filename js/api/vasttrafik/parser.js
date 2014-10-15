@@ -66,7 +66,7 @@ function parseDepartures(departures) {
 	var tmp = {};
 
 	departures.forEach(function(d) {
-		var direction = d.direction.split(', ');
+		var direction = d.direction.split('via ');
 		var ns = d.sname + '_' + direction[0];
 
 		if (!tmp[ns]) {
@@ -77,7 +77,7 @@ function parseDepartures(departures) {
 				type: d.type,
 				track: d.track,
 				timestamps: {
-					next: Time.difference(d.rtTime, _serverTime),
+					next: Time.difference(d.rtTime || d.time, _serverTime),
 					after: null
 				},
 				style: {

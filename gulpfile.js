@@ -35,6 +35,7 @@ gulp.task('browser-sync', function() {
 gulp.task('style', function() {
 	return gulp.src('styles/app.styl')
 		.pipe(stylus())
+		.pipe(autoprefixer('last 1 version'))
 		.pipe(gulp.dest('dist/css'))
 		.pipe(reload({
 			stream: true

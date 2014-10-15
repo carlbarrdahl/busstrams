@@ -1,30 +1,32 @@
-.slideUp-enter.slideUp-enter-active {
-  opacity 1
-  transform translate3d(0, 0, 0)
-}
+.animation-blink
+	color maroon !important
+	-webkit-animation: blink .8s ease-in-out infinite;
 
-.slideUp-leave {
-  opacity 1
-  transition opacity .2s ease-in
-}
+.animation-fall-enter.animation-fall-enter-active
+	opacity 1
+	transform translate3d(0, 0, 0)
 
-.slideUp-leave.slideUp-leave-active {
-  opacity 0.01
-}
+.animation-fall-leave
+	transition .4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+	opacity 0
 
+.animation-fall-leave.animation-fall-leave-active
+	opacity 1
 
 $animationDelay = 0.03s
-	.slideUp-enter
-		opacity 0.01
-		transform translate3d(0, -100%, 0)
-		transition .6s cubic-bezier(0.175, 0.885, 0.32, 1.275)
-		for $i in (1)..(20)
-			&:nth-child({$i})
-				transition-delay (($i * $animationDelay) - $animationDelay)
+.animation-fall-enter
+	opacity 0.01
+	transform translate3d(0, -100%, 0)
+	transition .4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+
+	for $i in (1)..(20)
+		&:nth-child({$i})
+			transition-delay (($i * $animationDelay) - $animationDelay)
 
 
 
-@keyframes marquee {
-    0%   { text-indent: 0 }
-    100% { text-indent: -100% }
+@keyframes blink {
+	0%   { opacity: .6 }
+	50% { opacity: .2 }
+	100%   { opacity: .6 }
 }

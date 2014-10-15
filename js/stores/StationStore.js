@@ -31,5 +31,5 @@ function emit(stations) {
 }
 
 StationStore.listen(function(stations) {
-	console.log('Storing stations...', stations);
+	// console.log('Storing stations...', stations);
 });

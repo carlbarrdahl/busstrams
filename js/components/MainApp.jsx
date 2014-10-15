@@ -1,26 +1,49 @@
-var React = require('react');
-var Header = require('./Common/Header.jsx');
+var React = require('react/addons');
+var Reflux = require('reflux');
 
+var Header = require('./Common/Header.jsx');
 var Omnibutton = require('./Common/Omnibutton.jsx');
 
-var MainApp = React.createClass({
+var Stations = require('./Stations/Stations.jsx');
+var Departures = require('./Departures/Departures.jsx');
+
+var Actions = require('../actions/Actions');
+var DataStore = require('../stores/DataStore');
+var LoadingStore = require('../stores/LoadingStore');
+// var StationStore = require('../stores/StationStore');
+// var DepartureStore = require('../stores/DepartureStore');
+// var SessionStore = require('../stores/SessionStore');
+
+var MainApp = module.exports = React.createClass({
+
+	mixins: [Reflux.ListenerMixin],
+
 	getInitialState: function() {
 		return {
-			loading: false
+			loading: false,
+			stations: [],
+			departures: {
+				current: '',
+				list: []
+			}
 		};
+	},
+
+	componentDidMount: function() {
+		this.listenTo(LoadingStore, this.setState);
+		this.listenTo(DataStore, this.setState);
+		Actions.getNearbyStations();
 	},
 
 	render: function() {
 		return (
 			<main>
-				<Header />
-				<Omnibutton />
-				<section className="content"><this.props.activeRouteHandler /></section>
+				<Header current={this.state.departures.current} />
+				<Omnibutton loading={this.state.loading} />
+				<Stations stations={this.state.stations} />
+				<Departures departures={this.state.departures} />
 			</main>
 		);
 	}
 
 });
-
-module.exports = MainApp;
-

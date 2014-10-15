@@ -1,38 +1,9 @@
-/*
-
-DepartureItem
-
-{
-	sname: vehicalNumber,
-	direction: endStation,
-	via: via,
-	type: vehicleType,
-	track: track,
-	timestamps: {
-		next: nextArrivesIn,
-		after: afterArrivesIn
-	},
-	style: {
-		color: '#000',
-		backgroundColor: '#fff'
-	}
-}
-
- */
-
 var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
-var Router = require('react-router');
-var Link = Router.Link;
-
-var PureRenderMixin = React.addons.PureRenderMixin;
 
 var Icon = require('../Common/Icon.jsx');
-var DepartureStore = require('../../stores/DepartureStore');
 
 var DepartureItem = module.exports = React.createClass({
-
-	mixins: [PureRenderMixin],
 
 	propTypes: {
 		departure: ReactPropTypes.object.isRequired
@@ -41,8 +12,17 @@ var DepartureItem = module.exports = React.createClass({
 	render: function() {
 		var departure = this.props.departure;
 
+		// console.log(departure)
+
+		if (departure.timestamps.next === 0) {
+
+			var style = {
+				opacity: .5
+			};
+		}
+
 		return (
-			<a>
+			<a className={departure.timestamps.next === 0 ? 'animation-blink' : ''}>
 				<figure style={departure.style}><span>{departure.sname}</span></figure>
 				<div className="col">
 					<div className="row">

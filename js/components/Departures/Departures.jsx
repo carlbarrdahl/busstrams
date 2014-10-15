@@ -1,42 +1,33 @@
 var React = require('react/addons');
-var PureRenderMixin = React.addons.PureRenderMixin;
+var ReactPropTypes = React.PropTypes;
 var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
-var Reflux = require('reflux');
-
 var Actions = require('../../actions/Actions');
-var DepartureStore = require('../../stores/DepartureStore');
 var DepartureItem = require('./DepartureItem.jsx');
 
 var intervalId;
 var Departures = module.exports = React.createClass({
 
-	mixins: [Reflux.ListenerMixin, PureRenderMixin],
-
-	getInitialState: function() {
-		return {
-			departures: []
-		};
+	propTypes: {
+		departures: ReactPropTypes.object.isRequired
 	},
 
-	componentDidMount: function() {
-		this.listenTo(DepartureStore, this.setState);
-
-		intervalId = setInterval(Actions.getDepartures.bind(this, this.props.query), 10000);
-		Actions.getDepartures(this.props.query);
-	},
-
-	componentWillUnmount: function() {
+	componentWillReceiveProps: function(props) {
 		clearInterval(intervalId);
+		if (props.departures.list.length) {
+			intervalId = setInterval(Actions.getDepartures.bind(this, props.departures.current), 2000);
+		}
 	},
 
 	render: function() {
-		var departures = this.state.departures.map(function(departure, id) {
+		console.log('Departures.render', this.props);
+
+		var departures = this.props.departures.list.map(function(departure, id) {
 			return <DepartureItem key={id} departure={departure} />;
 		});
 
 		return (
-			<CSSTransitionGroup transitionName="slideUp" className="Departures">
+			<CSSTransitionGroup transitionName="animation-fall" className="Departures">
 				{departures}
 			</CSSTransitionGroup>
 		)
