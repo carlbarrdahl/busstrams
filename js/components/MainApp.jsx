@@ -8,11 +8,9 @@ var Stations = require('./Stations/Stations.jsx');
 var Departures = require('./Departures/Departures.jsx');
 
 var Actions = require('../actions/Actions');
-var DataStore = require('../stores/DataStore');
 var LoadingStore = require('../stores/LoadingStore');
-// var StationStore = require('../stores/StationStore');
-// var DepartureStore = require('../stores/DepartureStore');
-// var SessionStore = require('../stores/SessionStore');
+var StationStore = require('../stores/StationStore');
+var DepartureStore = require('../stores/DepartureStore');
 
 var MainApp = module.exports = React.createClass({
 
@@ -31,7 +29,8 @@ var MainApp = module.exports = React.createClass({
 
 	componentDidMount: function() {
 		this.listenTo(LoadingStore, this.setState);
-		this.listenTo(DataStore, this.setState);
+		this.listenTo(StationStore, this.setState);
+		this.listenTo(DepartureStore, this.setState);
 		Actions.getNearbyStations();
 	},
 

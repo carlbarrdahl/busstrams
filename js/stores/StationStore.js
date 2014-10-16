@@ -6,7 +6,8 @@ var Api = require('../api/vasttrafik');
 
 var _stations = {};
 
-var StationStore = module.exports = Reflux.createStore({
+var DataStore = module.exports = Reflux.createStore({
+
 	init: function() {
 		this.listenTo(Actions.getNearbyStations, this.getNearbyStations);
 	},
@@ -23,13 +24,12 @@ var StationStore = module.exports = Reflux.createStore({
 	}
 });
 
-
 function emit(stations) {
 	Actions.loading(false);
-	_stations.stations = stations;
-	StationStore.trigger(_stations);
-}
 
-StationStore.listen(function(stations) {
-	// console.log('Storing stations...', stations);
-});
+	_stations = stations;
+
+	DataStore.trigger({
+		stations: _stations
+	});
+}

@@ -22,7 +22,7 @@ var Omnibutton = module.exports = React.createClass({
 	render: function() {
 
 		var icon = 'icon icon-spinner' + (this.props.loading ? ' loading' : '');
-		var src = '../../assets/icons/spinner.svg';
+		var src = 'assets/icons/spinner.svg';
 
 		return (
 			<div className="Omnibutton" onClick={this._handleOnTouchStart}>
