@@ -1,16 +1,11 @@
 var Reflux = require('reflux');
 
 var StationActions = module.exports = Reflux.createActions([
-	'loading',
-
+	'setLoading',
 
 	'getNearbyStations',
 	'getDepartures',
 	'clearDepartures',
 
-	'setCurrentStation',
-	'getCurrentStation',
-
-	'setCurrentJourney',
-	'getCurrentJourney'
+	'refreshDepartures'
 ]);

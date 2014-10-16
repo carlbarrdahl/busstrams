@@ -1,16 +1,22 @@
-.animation-blink
+.blink
 	color maroon !important
-	-webkit-animation: blink .8s ease-in-out infinite;
+	animation: blink .8s ease-in-out infinite;
 
 .animation-fall-enter.animation-fall-enter-active
 	opacity 1
 	transform translate3d(0, 0, 0)
 
 .animation-fall-leave
-	transition .4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+	transition .01s !important
+	animation: none !important
 	opacity 0
+	for $i in (1)..(20)
+		&:nth-child({$i})
+			transition-delay 0 !important
 
 .animation-fall-leave.animation-fall-leave-active
+	transition .01s !important
+	animation: none !important
 	opacity 1
 
 $animationDelay = 0.03s

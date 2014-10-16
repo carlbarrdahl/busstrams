@@ -21,17 +21,18 @@ var Station = React.createClass({
 	},
 
 	_handleClick: function(e) {
+		Actions.getDepartures(this.props.station);
+		// document.body.className = 'departures'
 
 		// TODO: Create a custom Router to handle this stuff
 
-		if (document.body.className === 'departures') {
-			Actions.clearDepartures();
-			return document.body.className = 'stations';
-		}
+		// if (document.body.className === 'departures') {
+		// 	Actions.clearDepartures();
+		// 	return document.body.className = 'stations';
+		// }
 
-		Actions.getDepartures(this.props.station);
-		document.body.className = 'departures'
-		document.body.scrollTop = 0;
+		// document.body.className = 'departures'
+		// document.body.scrollTop = 0;
 	}
 
 });

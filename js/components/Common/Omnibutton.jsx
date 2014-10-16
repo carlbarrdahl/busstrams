@@ -1,13 +1,3 @@
-/*
-
-Omnibutton
-- Loading notification
-- Back button
-- Show history on hold
-
-
- */
-
 var React = require('react/addons');
 var PureRenderMixin = React.addons.PureRenderMixin;
 

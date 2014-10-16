@@ -13,16 +13,13 @@ var Departures = module.exports = React.createClass({
 	},
 
 	componentWillReceiveProps: function(props) {
-		clearInterval(intervalId);
-		if (props.departures.list.length) {
-			intervalId = setInterval(Actions.getDepartures.bind(this, props.departures.current), 20000);
-		}
+		Actions.refreshDepartures(props.departures.list.length ? true : false);
 	},
 
 	render: function() {
-
+		console.log('Render departures', this.props);
 		return (
-			<CSSTransitionGroup transitionName="animation-fall" className="Departures">
+			<CSSTransitionGroup transitionName="animation-fall" component={React.DOM.div} className="Departures">
 				{
 					this.props.departures.list.map(function(departure, id) {
 						return <DepartureItem key={id} departure={departure} />;

@@ -9,20 +9,19 @@ var DepartureItem = module.exports = React.createClass({
 		departure: ReactPropTypes.object.isRequired
 	},
 
+	componentWillLeave: function() {
+		console.log('will unmount', this.getDOMNode());
+
+		if (this.getDOMNode().classList.contains('blink')) {
+			console.log('Blinkin', this.getDOMNode())
+		}
+	},
+
 	render: function() {
 		var departure = this.props.departure;
 
-		// console.log(departure)
-
-		if (departure.timestamps.next === 0) {
-
-			var style = {
-				opacity: .5
-			};
-		}
-
 		return (
-			<a className={departure.timestamps.next === 0 ? 'animation-blink' : ''}>
+			<a className={departure.timestamps.next === 0 ? 'blink' : ''} onClick={this._handleClick}>
 				<figure style={departure.style}><span>{departure.sname}</span></figure>
 				<div className="col">
 					<div className="row">
@@ -41,6 +40,10 @@ var DepartureItem = module.exports = React.createClass({
 				</div>
 			</a>
 		);
+	},
+
+	_handleClick: function() {
+		console.log('click departure')
 	}
 
 });

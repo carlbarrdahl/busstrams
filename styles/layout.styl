@@ -1,17 +1,18 @@
 .Stations, .Departures
-	transition .3s
 	position absolute
 	width 100%
 	background #fff
 
 
 
-body.stations
+main.stations
 	.Departures
-		transform translate3d(0, -110%, 0);
+		// max-height 0
+		// transform translate3d(0, -110%, 0);
 
-body.departures
+main.departures
 	.Stations
+		pointer-events none
 		opacity .3
 
 	.Omnibutton
