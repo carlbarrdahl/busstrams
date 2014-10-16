@@ -9,14 +9,6 @@ var DepartureItem = module.exports = React.createClass({
 		departure: ReactPropTypes.object.isRequired
 	},
 
-	componentWillLeave: function() {
-		console.log('will unmount', this.getDOMNode());
-
-		if (this.getDOMNode().classList.contains('blink')) {
-			console.log('Blinkin', this.getDOMNode())
-		}
-	},
-
 	render: function() {
 		var departure = this.props.departure;
 

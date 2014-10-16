@@ -4,19 +4,19 @@
 	background #fff
 
 
-
 main.stations
 	.Departures
-		// max-height 0
-		// transform translate3d(0, -110%, 0);
+		transform translate3d(0, -110%, 0)
 
 main.departures
 	.Stations
+		overflow hidden
 		pointer-events none
-		opacity .3
+
+		li
+			opacity .3
 
 	.Omnibutton
-		// top 0
 
 		.icon.icon-spinner svg
 			g path:nth-of-type(odd)

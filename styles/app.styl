@@ -19,7 +19,7 @@ h3
 	font-weight 400
 
 main
-	height 100%
+	height calc(100% - 56px)
 
 .row
 	display flex
@@ -27,3 +27,9 @@ main
 
 .col
 	flex 1
+
+
+.disable-hover,
+.disable-hover * {
+  pointer-events: none !important;
+}

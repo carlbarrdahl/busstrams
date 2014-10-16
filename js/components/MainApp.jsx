@@ -10,6 +10,8 @@ var Departures = require('./Departures/Departures.jsx');
 var Actions = require('../actions/Actions');
 var Store = require('../stores/Store');
 
+
+var className;
 var MainApp = module.exports = React.createClass({
 
 	mixins: [Reflux.ListenerMixin],
@@ -22,24 +24,26 @@ var MainApp = module.exports = React.createClass({
 	},
 
 	render: function() {
-		var className = this.state.departures.list.length ? 'departures' : 'stations';
+		// console.log('App render', this.state);
 
 		return (
-			<main onClick={this._handleClick} className={className}>
+			<main onClick={this._handleClick} className={this.state.state}>
 				<Header current={this.state.currentStation} />
 				<Omnibutton loading={this.state.loading} />
-				<Stations stations={this.state.stations} />
+				<Stations stations={this.state.stations} selected={this.state.currentStation} />
 				<Departures departures={this.state.departures} />
 			</main>
 		);
 	},
 
 	_handleClick: function(e) {
-		console.log('click', e);
-
-		if (this.state.departures.list.length) {
+		console.log('state', this.state.state)
+		if (this.state.state === 'departures' && this.state.departures.list.length) {
+			Actions.setState('stations');
 			Actions.clearDepartures();
 		}
+
+		document.body.scrollTop = 0;
 	}
 
 });

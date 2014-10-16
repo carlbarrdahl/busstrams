@@ -344,8 +344,15 @@ img {
   width: 100%;
   background: #fff;
 }
+main.stations .Departures {
+  -webkit-transform: translate3d(0, -110%, 0);
+          transform: translate3d(0, -110%, 0);
+}
 main.departures .Stations {
+  overflow: hidden;
   pointer-events: none;
+}
+main.departures .Stations li {
   opacity: 0.3;
 }
 main.departures .Omnibutton .icon.icon-spinner svg g path:nth-of-type(odd) {
@@ -357,6 +364,8 @@ main.departures .Omnibutton .icon.icon-spinner svg g path:nth-of-type(even) {
           transform: rotate(-90deg);
 }
 .Departures {
+  -webkit-transition: -webkit-transform 0.3s;
+          transition: transform 0.3s;
   max-height: 400px;
   overflow: scroll;
   overflow-x: hidden;
@@ -434,7 +443,6 @@ main {
 }
 .Header {
   position: fixed;
-  z-index: 100;
   top: 0;
   width: 100%;
   height: 56px;
@@ -453,14 +461,7 @@ main {
       -ms-flex-pack: center;
           justify-content: center;
   font-weight: bold;
-}
-.example-enter {
-  opacity: 0.01;
-  -webkit-transition: opacity 0.5s ease-in;
-          transition: opacity 0.5s ease-in;
-}
-.example-enter.example-enter-active {
-  opacity: 1;
+  z-index: 1000;
 }
 .Journey a {
   display: -webkit-box;
@@ -548,10 +549,9 @@ main {
   box-shadow: 0px 0px 2px;
 }
 .Stations {
-  -webkit-transition: opacity 0.3s;
-          transition: opacity 0.3s;
+  max-height: calc(100% - 56px);
 }
-.Stations a {
+.Stations li {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -569,14 +569,15 @@ main {
   border-bottom: 1px solid #eee;
   padding: 0 16px;
   background: #fff;
+  position: relative;
 }
-.Stations h4 {
+.Stations li > h4 {
   -webkit-box-flex: 1;
   -webkit-flex: 1;
       -ms-flex: 1;
           flex: 1;
 }
-.Stations span {
+.Stations li > div {
   font-size: 80%;
   font-weight: 300;
 }
@@ -587,7 +588,7 @@ h3 {
   font-weight: 400;
 }
 main {
-  height: 100%;
+  height: calc(100% - 56px);
 }
 .row {
   display: -webkit-box;
@@ -605,4 +606,8 @@ main {
   -webkit-flex: 1;
       -ms-flex: 1;
           flex: 1;
+}
+.disable-hover,
+.disable-hover * {
+  pointer-events: none !important;
 }

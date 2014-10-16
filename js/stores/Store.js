@@ -3,7 +3,8 @@ var Actions = require('../actions/Actions');
 var Geo = require('../helpers/geo');
 var Api = require('../api/vasttrafik');
 
-var _state = {
+var _data = {
+	state: null,
 	lastOnline: Date.now(),
 	loading: true,
 	position: {
@@ -25,9 +26,10 @@ var _state = {
 var Store = module.exports = Reflux.createStore({
 
 	init: function() {
-		console.log('Init store', _state);
+		console.log('Init store', _data);
 
 		this.listenTo(Actions.setLoading, setLoading);
+		this.listenTo(Actions.setState, setState);
 		this.listenTo(Actions.getNearbyStations, getNearbyStations);
 		this.listenTo(Actions.getDepartures, getDepartures);
 		this.listenTo(Actions.clearDepartures, clearDepartures);
@@ -37,37 +39,42 @@ var Store = module.exports = Reflux.createStore({
 	},
 
 	getInitialState: function() {
-		return _state;
+		return _data;
 	}
 
 });
 
 function emit() {
 	Actions.setLoading(false);
-	Store.trigger(_state);
+	Store.trigger(_data);
 }
 
 function setLoading(loading) {
-	_state.loading = loading;
-	Store.trigger(_state);
+	_data.loading = loading;
+	Store.trigger(_data);
 }
 
 function setPosition(position) {
-	_state.position.init ? (_state.position.current = position) : (_state.position.init = _state.position.current = position);
+	_data.position.init ? (_data.position.current = position) : (_data.position.init = _data.position.current = position);
 	return position;
 }
 
+function setState(state) {
+	_data.state = state;
+	Store.trigger(_data);
+}
+
 function setCurrentStation(station) {
-	_state.currentStation = station || {};
+	_data.currentStation = station || {};
 }
 
 function setStations(stations) {
-	_state.stations.list = stations || [];
+	_data.stations.list = stations || [];
 	emit();
 }
 
 function setDepartures(departures) {
-	_state.departures.list = departures || [];
+	_data.departures.list = departures || [];
 	emit();
 }
 
@@ -94,7 +101,7 @@ function refreshDepartures(state) {
 	clearInterval(_refreshDeparturesInterval);
 
 	if (state) {
-		_refreshDeparturesInterval = setInterval(Actions.getDepartures.bind(null, _state.currentStation), 20000);
+		_refreshDeparturesInterval = setInterval(Actions.getDepartures.bind(null, _data.currentStation), 20000);
 	}
 }
 

@@ -13,15 +13,16 @@ var Station = React.createClass({
 		var station = this.props.station;
 
 		return (
-			<a onClick={this._handleClick}>
+			<li onClick={this._handleClick}>
 				<h4>{station.name}</h4>
-				<span>{station.distance} m</span>
-			</a>
+				<div>{station.distance} m</div>
+			</li>
 		);
 	},
 
 	_handleClick: function(e) {
 		Actions.getDepartures(this.props.station);
+		Actions.setState('departures');
 		// document.body.className = 'departures'
 
 		// TODO: Create a custom Router to handle this stuff

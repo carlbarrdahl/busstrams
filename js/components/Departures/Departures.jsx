@@ -17,7 +17,7 @@ var Departures = module.exports = React.createClass({
 	},
 
 	render: function() {
-		console.log('Render departures', this.props);
+		// console.log('Render departures', this.props);
 		return (
 			<CSSTransitionGroup transitionName="animation-fall" component={React.DOM.div} className="Departures">
 				{

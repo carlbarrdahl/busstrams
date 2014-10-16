@@ -13,6 +13,7 @@ var Reflux = require('reflux');
 
 var StationActions = module.exports = Reflux.createActions([
 	'setLoading',
+	'setState',
 
 	'getNearbyStations',
 	'getDepartures',
@@ -261,14 +262,6 @@ var DepartureItem = module.exports = React.createClass({displayName: 'exports',
 		departure: ReactPropTypes.object.isRequired
 	},
 
-	componentWillLeave: function() {
-		console.log('will unmount', this.getDOMNode());
-
-		if (this.getDOMNode().classList.contains('blink')) {
-			console.log('Blinkin', this.getDOMNode())
-		}
-	},
-
 	render: function() {
 		var departure = this.props.departure;
 
@@ -320,7 +313,7 @@ var Departures = module.exports = React.createClass({displayName: 'exports',
 	},
 
 	render: function() {
-		console.log('Render departures', this.props);
+		// console.log('Render departures', this.props);
 		return (
 			CSSTransitionGroup({transitionName: "animation-fall", component: React.DOM.div, className: "Departures"}, 
 				
@@ -346,6 +339,8 @@ var Departures = require('./Departures/Departures.jsx');
 var Actions = require('../actions/Actions');
 var Store = require('../stores/Store');
 
+
+var className;
 var MainApp = module.exports = React.createClass({displayName: 'exports',
 
 	mixins: [Reflux.ListenerMixin],
@@ -358,24 +353,26 @@ var MainApp = module.exports = React.createClass({displayName: 'exports',
 	},
 
 	render: function() {
-		var className = this.state.departures.list.length ? 'departures' : 'stations';
+		// console.log('App render', this.state);
 
 		return (
-			React.DOM.main({onClick: this._handleClick, className: className}, 
+			React.DOM.main({onClick: this._handleClick, className: this.state.state}, 
 				Header({current: this.state.currentStation}), 
 				Omnibutton({loading: this.state.loading}), 
-				Stations({stations: this.state.stations}), 
+				Stations({stations: this.state.stations, selected: this.state.currentStation}), 
 				Departures({departures: this.state.departures})
 			)
 		);
 	},
 
 	_handleClick: function(e) {
-		console.log('click', e);
-
-		if (this.state.departures.list.length) {
+		console.log('state', this.state.state)
+		if (this.state.state === 'departures' && this.state.departures.list.length) {
+			Actions.setState('stations');
 			Actions.clearDepartures();
 		}
+
+		document.body.scrollTop = 0;
 	}
 
 });
@@ -396,15 +393,16 @@ var Station = React.createClass({displayName: 'Station',
 		var station = this.props.station;
 
 		return (
-			React.DOM.a({onClick: this._handleClick}, 
+			React.DOM.li({onClick: this._handleClick}, 
 				React.DOM.h4(null, station.name), 
-				React.DOM.span(null, station.distance, " m")
+				React.DOM.div(null, station.distance, " m")
 			)
 		);
 	},
 
 	_handleClick: function(e) {
 		Actions.getDepartures(this.props.station);
+		Actions.setState('departures');
 		// document.body.className = 'departures'
 
 		// TODO: Create a custom Router to handle this stuff
@@ -436,12 +434,14 @@ var Stations = module.exports = React.createClass({displayName: 'exports',
 	},
 
 	render: function() {
+		var current = this.props.selected.id;
+
 
 		return (
-			CSSTransitionGroup({component: React.DOM.div, transitionName: "animation-fall", className: "Stations"}, 
+			CSSTransitionGroup({component: React.DOM.ul, transitionName: "animation-fall", className: "Stations"}, 
 				
 					this.props.stations.list.map(function(station) {
-						return StationItem({key: station.id, station: station});
+						return StationItem({key: station.id, station: station, selected: current});
 					})
 				
 			)
@@ -561,7 +561,8 @@ var Actions = require('../actions/Actions');
 var Geo = require('../helpers/geo');
 var Api = require('../api/vasttrafik');
 
-var _state = {
+var _data = {
+	state: null,
 	lastOnline: Date.now(),
 	loading: true,
 	position: {
@@ -583,9 +584,10 @@ var _state = {
 var Store = module.exports = Reflux.createStore({
 
 	init: function() {
-		console.log('Init store', _state);
+		console.log('Init store', _data);
 
 		this.listenTo(Actions.setLoading, setLoading);
+		this.listenTo(Actions.setState, setState);
 		this.listenTo(Actions.getNearbyStations, getNearbyStations);
 		this.listenTo(Actions.getDepartures, getDepartures);
 		this.listenTo(Actions.clearDepartures, clearDepartures);
@@ -595,37 +597,42 @@ var Store = module.exports = Reflux.createStore({
 	},
 
 	getInitialState: function() {
-		return _state;
+		return _data;
 	}
 
 });
 
 function emit() {
 	Actions.setLoading(false);
-	Store.trigger(_state);
+	Store.trigger(_data);
 }
 
 function setLoading(loading) {
-	_state.loading = loading;
-	Store.trigger(_state);
+	_data.loading = loading;
+	Store.trigger(_data);
 }
 
 function setPosition(position) {
-	_state.position.init ? (_state.position.current = position) : (_state.position.init = _state.position.current = position);
+	_data.position.init ? (_data.position.current = position) : (_data.position.init = _data.position.current = position);
 	return position;
 }
 
+function setState(state) {
+	_data.state = state;
+	Store.trigger(_data);
+}
+
 function setCurrentStation(station) {
-	_state.currentStation = station || {};
+	_data.currentStation = station || {};
 }
 
 function setStations(stations) {
-	_state.stations.list = stations || [];
+	_data.stations.list = stations || [];
 	emit();
 }
 
 function setDepartures(departures) {
-	_state.departures.list = departures || [];
+	_data.departures.list = departures || [];
 	emit();
 }
 
@@ -652,7 +659,7 @@ function refreshDepartures(state) {
 	clearInterval(_refreshDeparturesInterval);
 
 	if (state) {
-		_refreshDeparturesInterval = setInterval(Actions.getDepartures.bind(null, _state.currentStation), 20000);
+		_refreshDeparturesInterval = setInterval(Actions.getDepartures.bind(null, _data.currentStation), 20000);
 	}
 }
 

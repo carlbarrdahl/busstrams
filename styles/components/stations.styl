@@ -9,8 +9,9 @@ Stations
 
 
 .Stations
-	transition opacity .3s
-	a
+	max-height calc(100% - 56px)
+
+	li
 		display flex
 		flex-direction row
 		align-items center
@@ -18,10 +19,11 @@ Stations
 		border-bottom 1px solid #eee
 		padding	0 16px
 		background #fff
+		position relative
 
-.Stations h4
-	flex 1
+		> h4
+			flex 1
 
-.Stations span
-	font-size 80%
-	font-weight 300
+		> div
+			font-size 80%
+			font-weight 300
