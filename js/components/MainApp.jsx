@@ -1,6 +1,6 @@
 var React = require('react/addons');
 var Reflux = require('reflux');
-
+var PureRenderMixin = React.addons.PureRenderMixin;
 var Header = require('./Common/Header.jsx');
 var Omnibutton = require('./Common/Omnibutton.jsx');
 
@@ -14,7 +14,7 @@ var Store = require('../stores/Store');
 var className;
 var MainApp = module.exports = React.createClass({
 
-	mixins: [Reflux.ListenerMixin],
+	mixins: [PureRenderMixin, Reflux.ListenerMixin],
 
 	getInitialState: Store.getInitialState,
 
@@ -36,7 +36,7 @@ var MainApp = module.exports = React.createClass({
 
 	_handleClick: function(e) {
 		console.log('state', this.state.state)
-		if (this.state.state === 'departures' && this.state.departures.list.length) {
+		if (this.state.state === 'departures' && this.state.departures.length) {
 			Actions.setState('stations');
 			Actions.clearDepartures();
 		}

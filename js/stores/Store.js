@@ -12,12 +12,8 @@ var _data = {
 		current: null
 	},
 	currentStation: {},
-	stations: {
-		list: []
-	},
-	departures: {
-		list: []
-	},
+	stations: [],
+	departures: [],
 	journeyHistory: {
 		list: []
 	}
@@ -51,7 +47,7 @@ function emit() {
 
 function setLoading(loading) {
 	_data.loading = loading;
-	Store.trigger(_data);
+	emit();
 }
 
 function setPosition(position) {
@@ -61,7 +57,7 @@ function setPosition(position) {
 
 function setState(state) {
 	_data.state = state;
-	Store.trigger(_data);
+	emit();
 }
 
 function setCurrentStation(station) {
@@ -69,13 +65,13 @@ function setCurrentStation(station) {
 }
 
 function setStations(stations) {
-	_data.stations.list = stations || [];
+	_data.stations = stations || [];
 	emit();
 }
 
 function setDepartures(departures) {
-	_data.departures.list = departures || [];
-	emit();
+	_data.departures = departures || [];
+	// emit();
 }
 
 function getNearbyStations() {
@@ -97,6 +93,7 @@ function getDepartures(station) {
 }
 
 var _refreshDeparturesInterval;
+
 function refreshDepartures(state) {
 	clearInterval(_refreshDeparturesInterval);
 
@@ -108,4 +105,5 @@ function refreshDepartures(state) {
 function clearDepartures() {
 	setCurrentStation();
 	setDepartures();
+	// setTimeout(setDepartures, 200);
 }

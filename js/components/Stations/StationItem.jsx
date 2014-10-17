@@ -1,9 +1,12 @@
 var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
+var PureRenderMixin = React.addons.PureRenderMixin;
 
 var Actions = require('../../actions/Actions');
 
 var Station = React.createClass({
+
+	mixins: [PureRenderMixin],
 
 	propTypes: {
 		station: ReactPropTypes.object.isRequired

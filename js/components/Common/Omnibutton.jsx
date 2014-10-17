@@ -22,8 +22,6 @@ var Omnibutton = module.exports = React.createClass({
 	},
 
 	_handleOnTouchStart: function(e) {
-		document.body.className = 'stations';
-
 		Actions.clearDepartures();
 	}
 

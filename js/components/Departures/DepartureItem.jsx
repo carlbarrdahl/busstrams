@@ -1,5 +1,6 @@
 var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
+var PureRenderMixin = React.addons.PureRenderMixin;
 
 var Icon = require('../Common/Icon.jsx');
 var Bubble = require('../Common/Bubble.jsx');
@@ -13,20 +14,25 @@ var _departure = {
 	},
 	"style": {
 		"backgroundColor": "#eee",
-		"color": "#333"
+		"color": "#556270"
 	},
 	className: 'BLOKK'
 };
 
 var DepartureItem = module.exports = React.createClass({
 
+	mixins: [PureRenderMixin],
+
 	propTypes: {
-		departure: ReactPropTypes.object.isRequired
+		departure: ReactPropTypes.object
+	},
+
+	getDefaultProps: function() {
+		return {departure: _departure};
 	},
 
 	render: function() {
-		var departure = this.props.departure || _departure;
-		console.log('DepartureItem', departure)
+		var departure = this.props.departure;
 
 		var className = (departure.className || '') + ' Departures__item' + (departure.timestamps.next === 0 ? ' blink' : '');
 
@@ -54,8 +60,10 @@ var DepartureItem = module.exports = React.createClass({
 		);
 	},
 
-	_handleClick: function() {
-		console.log('click departure')
+	_handleClick: function(e) {
+		console.log('click departure');
+		e.preventDefault();
+		return false;
 	}
 
 });

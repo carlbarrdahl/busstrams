@@ -12,6 +12,8 @@ var Reflux = require('reflux');
 var StationActions = module.exports = Reflux.createActions([
 	'setLoading',
 	'setState',
+	'setCurrentStation',
+	'getCurrentStation',
 
 	'getNearbyStations',
 	'getDepartures',
@@ -250,8 +252,6 @@ var Omnibutton = module.exports = React.createClass({displayName: 'exports',
 	},
 
 	_handleOnTouchStart: function(e) {
-		document.body.className = 'stations';
-
 		Actions.clearDepartures();
 	}
 
@@ -260,6 +260,7 @@ var Omnibutton = module.exports = React.createClass({displayName: 'exports',
 },{"../../actions/Actions":2,"react-inlinesvg":35,"react/addons":48}],10:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
+var PureRenderMixin = React.addons.PureRenderMixin;
 
 var Icon = require('../Common/Icon.jsx');
 var Bubble = require('../Common/Bubble.jsx');
@@ -273,20 +274,25 @@ var _departure = {
 	},
 	"style": {
 		"backgroundColor": "#eee",
-		"color": "#333"
+		"color": "#556270"
 	},
 	className: 'BLOKK'
 };
 
 var DepartureItem = module.exports = React.createClass({displayName: 'exports',
 
+	mixins: [PureRenderMixin],
+
 	propTypes: {
-		departure: ReactPropTypes.object.isRequired
+		departure: ReactPropTypes.object
+	},
+
+	getDefaultProps: function() {
+		return {departure: _departure};
 	},
 
 	render: function() {
-		var departure = this.props.departure || _departure;
-		console.log('DepartureItem', departure)
+		var departure = this.props.departure;
 
 		var className = (departure.className || '') + ' Departures__item' + (departure.timestamps.next === 0 ? ' blink' : '');
 
@@ -314,8 +320,10 @@ var DepartureItem = module.exports = React.createClass({displayName: 'exports',
 		);
 	},
 
-	_handleClick: function() {
-		console.log('click departure')
+	_handleClick: function(e) {
+		console.log('click departure');
+		e.preventDefault();
+		return false;
 	}
 
 });
@@ -323,6 +331,7 @@ var DepartureItem = module.exports = React.createClass({displayName: 'exports',
 },{"../Common/Bubble.jsx":6,"../Common/Icon.jsx":8,"react/addons":48}],11:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
+var PureRenderMixin = React.addons.PureRenderMixin;
 var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var Actions = require('../../actions/Actions');
@@ -331,16 +340,18 @@ var DepartureItem = require('./DepartureItem.jsx');
 var intervalId;
 var Departures = module.exports = React.createClass({displayName: 'exports',
 
+	mixins: [PureRenderMixin],
+
 	propTypes: {
 		departures: ReactPropTypes.object.isRequired
 	},
 
 	componentWillReceiveProps: function(props) {
-		Actions.refreshDepartures(props.departures.list.length ? true : false);
+		Actions.refreshDepartures(props.departures.length ? true : false);
 	},
 
 	render: function() {
-		var departures = this.props.departures.list;
+		var departures = this.props.departures;
 
 		departures = departures.map(function(departure, id) {
 			return DepartureItem({key: id, departure: departure});
@@ -359,7 +370,7 @@ var Departures = module.exports = React.createClass({displayName: 'exports',
 },{"../../actions/Actions":2,"./DepartureItem.jsx":10,"react/addons":48}],12:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var Reflux = require('reflux');
-
+var PureRenderMixin = React.addons.PureRenderMixin;
 var Header = require('./Common/Header.jsx');
 var Omnibutton = require('./Common/Omnibutton.jsx');
 
@@ -373,7 +384,7 @@ var Store = require('../stores/Store');
 var className;
 var MainApp = module.exports = React.createClass({displayName: 'exports',
 
-	mixins: [Reflux.ListenerMixin],
+	mixins: [PureRenderMixin, Reflux.ListenerMixin],
 
 	getInitialState: Store.getInitialState,
 
@@ -395,7 +406,7 @@ var MainApp = module.exports = React.createClass({displayName: 'exports',
 
 	_handleClick: function(e) {
 		console.log('state', this.state.state)
-		if (this.state.state === 'departures' && this.state.departures.list.length) {
+		if (this.state.state === 'departures' && this.state.departures.length) {
 			Actions.setState('stations');
 			Actions.clearDepartures();
 		}
@@ -408,10 +419,13 @@ var MainApp = module.exports = React.createClass({displayName: 'exports',
 },{"../actions/Actions":2,"../stores/Store":18,"./Common/Header.jsx":7,"./Common/Omnibutton.jsx":9,"./Departures/Departures.jsx":11,"./Stations/Stations.jsx":14,"react/addons":48,"reflux":219}],13:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
+var PureRenderMixin = React.addons.PureRenderMixin;
 
 var Actions = require('../../actions/Actions');
 
 var Station = React.createClass({displayName: 'Station',
+
+	mixins: [PureRenderMixin],
 
 	propTypes: {
 		station: ReactPropTypes.object.isRequired
@@ -451,24 +465,27 @@ module.exports = Station;
 },{"../../actions/Actions":2,"react/addons":48}],14:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
+var PureRenderMixin = React.addons.PureRenderMixin;
 var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var StationItem = require('./StationItem.jsx');
 
 var Stations = module.exports = React.createClass({displayName: 'exports',
 
+	mixins: [PureRenderMixin],
+
 	propTypes: {
-		stations: ReactPropTypes.object.isRequired
+		stations: ReactPropTypes.array.isRequired
 	},
 
 	render: function() {
+		console.log('render station', this.props)
 		var current = this.props.selected.id;
-
 
 		return (
 			CSSTransitionGroup({transitionName: "animation-fall", className: "Stations"}, 
 				
-					this.props.stations.list.map(function(station) {
+					this.props.stations.map(function(station) {
 						return StationItem({key: station.id, station: station, selected: current});
 					})
 				
@@ -598,12 +615,8 @@ var _data = {
 		current: null
 	},
 	currentStation: {},
-	stations: {
-		list: []
-	},
-	departures: {
-		list: []
-	},
+	stations: [],
+	departures: [],
 	journeyHistory: {
 		list: []
 	}
@@ -637,7 +650,7 @@ function emit() {
 
 function setLoading(loading) {
 	_data.loading = loading;
-	Store.trigger(_data);
+	emit();
 }
 
 function setPosition(position) {
@@ -647,7 +660,7 @@ function setPosition(position) {
 
 function setState(state) {
 	_data.state = state;
-	Store.trigger(_data);
+	emit();
 }
 
 function setCurrentStation(station) {
@@ -655,13 +668,13 @@ function setCurrentStation(station) {
 }
 
 function setStations(stations) {
-	_data.stations.list = stations || [];
+	_data.stations = stations || [];
 	emit();
 }
 
 function setDepartures(departures) {
-	_data.departures.list = departures || [];
-	emit();
+	_data.departures = departures || [];
+	// emit();
 }
 
 function getNearbyStations() {
@@ -683,6 +696,7 @@ function getDepartures(station) {
 }
 
 var _refreshDeparturesInterval;
+
 function refreshDepartures(state) {
 	clearInterval(_refreshDeparturesInterval);
 
@@ -694,6 +708,7 @@ function refreshDepartures(state) {
 function clearDepartures() {
 	setCurrentStation();
 	setDepartures();
+	// setTimeout(setDepartures, 200);
 }
 
 },{"../actions/Actions":2,"../api/vasttrafik":4,"../helpers/geo":15,"reflux":219}],19:[function(require,module,exports){

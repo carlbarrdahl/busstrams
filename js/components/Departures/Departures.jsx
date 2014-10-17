@@ -1,5 +1,6 @@
 var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
+var PureRenderMixin = React.addons.PureRenderMixin;
 var CSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var Actions = require('../../actions/Actions');
@@ -8,16 +9,18 @@ var DepartureItem = require('./DepartureItem.jsx');
 var intervalId;
 var Departures = module.exports = React.createClass({
 
+	mixins: [PureRenderMixin],
+
 	propTypes: {
 		departures: ReactPropTypes.object.isRequired
 	},
 
 	componentWillReceiveProps: function(props) {
-		Actions.refreshDepartures(props.departures.list.length ? true : false);
+		Actions.refreshDepartures(props.departures.length ? true : false);
 	},
 
 	render: function() {
-		var departures = this.props.departures.list;
+		var departures = this.props.departures;
 
 		departures = departures.map(function(departure, id) {
 			return <DepartureItem key={id} departure={departure} />;
