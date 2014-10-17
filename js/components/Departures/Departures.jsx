@@ -19,7 +19,7 @@ var Departures = module.exports = React.createClass({
 	render: function() {
 		// console.log('Render departures', this.props);
 		return (
-			<CSSTransitionGroup transitionName="animation-fall" component={React.DOM.div} className="Departures">
+			<CSSTransitionGroup transitionName="animation-fall" className="Departures">
 				{
 					this.props.departures.list.map(function(departure, id) {
 						return <DepartureItem key={id} departure={departure} />;

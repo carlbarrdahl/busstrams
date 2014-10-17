@@ -15,7 +15,7 @@ var Stations = module.exports = React.createClass({
 
 
 		return (
-			<CSSTransitionGroup component={React.DOM.ul} transitionName="animation-fall" className="Stations">
+			<CSSTransitionGroup transitionName="animation-fall" className="Stations">
 				{
 					this.props.stations.list.map(function(station) {
 						return <StationItem key={station.id} station={station} selected={current} />;

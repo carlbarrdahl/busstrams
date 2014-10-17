@@ -24,8 +24,6 @@ var MainApp = module.exports = React.createClass({
 	},
 
 	render: function() {
-		// console.log('App render', this.state);
-
 		return (
 			<main onClick={this._handleClick} className={this.state.state}>
 				<Header current={this.state.currentStation} />

@@ -551,7 +551,7 @@ main {
 .Stations {
   max-height: calc(100% - 56px);
 }
-.Stations li {
+.Stations .Stations__item {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -571,13 +571,13 @@ main {
   background: #fff;
   position: relative;
 }
-.Stations li > h4 {
+.Stations .Stations__item > h4 {
   -webkit-box-flex: 1;
   -webkit-flex: 1;
       -ms-flex: 1;
           flex: 1;
 }
-.Stations li > div {
+.Stations .Stations__item > div {
   font-size: 80%;
   font-weight: 300;
 }

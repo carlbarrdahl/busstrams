@@ -13,10 +13,10 @@ var Station = React.createClass({
 		var station = this.props.station;
 
 		return (
-			<li onClick={this._handleClick}>
+			<div className="Stations__item" onClick={this._handleClick}>
 				<h4>{station.name}</h4>
 				<div>{station.distance} m</div>
-			</li>
+			</div>
 		);
 	},
 
