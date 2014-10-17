@@ -6,6 +6,7 @@ var Omnibutton = require('./Common/Omnibutton.jsx');
 
 var Stations = require('./Stations/Stations.jsx');
 var Departures = require('./Departures/Departures.jsx');
+var Journeys = require('./Journeys/Journeys.jsx');
 
 var Actions = require('../actions/Actions');
 var Store = require('../stores/Store');
@@ -24,12 +25,14 @@ var MainApp = module.exports = React.createClass({
 	},
 
 	render: function() {
+		console.log('this.state.journeys', this.state.journeys)
 		return (
 			<main onClick={this._handleClick} className={this.state.state}>
 				<Header current={this.state.currentStation} />
 				<Omnibutton loading={this.state.loading} />
 				<Stations stations={this.state.stations} selected={this.state.currentStation} />
 				<Departures departures={this.state.departures} />
+				<Journeys journeys={this.state.journeys} />
 			</main>
 		);
 	},

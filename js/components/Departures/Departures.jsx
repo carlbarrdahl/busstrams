@@ -12,7 +12,7 @@ var Departures = module.exports = React.createClass({
 	mixins: [PureRenderMixin],
 
 	propTypes: {
-		departures: ReactPropTypes.object.isRequired
+		departures: ReactPropTypes.array.isRequired
 	},
 
 	componentWillReceiveProps: function(props) {
@@ -20,17 +20,14 @@ var Departures = module.exports = React.createClass({
 	},
 
 	render: function() {
-		var departures = this.props.departures;
-
-		departures = departures.map(function(departure, id) {
-			return <DepartureItem key={id} departure={departure} />;
-		});
-
-		departures = departures.length ? departures : <DepartureItem />
 
 		return (
 			<CSSTransitionGroup transitionName="animation-fall" className="Departures">
-				{departures}
+				{
+					this.props.departures.map(function(departure, id) {
+						return <DepartureItem key={id} departure={departure} />;
+					})
+				}
 			</CSSTransitionGroup>
 		)
 	}

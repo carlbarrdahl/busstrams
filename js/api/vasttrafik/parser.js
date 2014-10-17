@@ -17,6 +17,9 @@ var Parser = module.exports = {
 	},
 
 	departures: function(data) {
+		if (data.DepartureBoard.error) {
+			return data.DepartureBoard;
+		}
 		// FIXME: find a better way to handle servertime
 		_serverTime = data.DepartureBoard.servertime;
 
@@ -52,6 +55,7 @@ function parseStations(stations) {
  * @return {Array} departures Sorted departures
  */
 function sortDepartures(departures) {
+	console.log(departures)
 	return departures.sort(function(a, b) {
 		return new Date('1970/01/01 ' + (a.rtTime || a.time)) - new Date('1970/01/01 ' + (b.rtTime || b.time));
 	});
@@ -66,7 +70,7 @@ function parseDepartures(departures) {
 	var tmp = {};
 
 	departures.forEach(function(d) {
-		var direction = d.direction.split('via ');
+		var direction = d.direction.split(' via ');
 		var ns = d.sname + '_' + direction[0];
 
 		if (!tmp[ns]) {

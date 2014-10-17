@@ -1,22 +1,16 @@
-.Stations, .Departures
-	position absolute
-	width 100%
-	background #fff
-
-
 main.stations
 	.Departures
 		transform translate3d(0, -110%, 0)
 
 main.departures
-	.Stations, .Stations div
+
+	.Stations
 		transition color .3s
 		overflow hidden
 		pointer-events none
-		color _gray-light
+		color _gray-light !important
 
 	.Omnibutton
-
 		.icon.icon-spinner svg
 			g path:nth-of-type(odd)
 				opacity 0

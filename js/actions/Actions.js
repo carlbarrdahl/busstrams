@@ -9,6 +9,7 @@ var StationActions = module.exports = Reflux.createActions([
 	'getNearbyStations',
 	'getDepartures',
 	'clearDepartures',
+	'refreshDepartures',
 
-	'refreshDepartures'
+	'setJourney'
 ]);

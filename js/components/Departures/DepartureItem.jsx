@@ -2,6 +2,8 @@ var React = require('react/addons');
 var ReactPropTypes = React.PropTypes;
 var PureRenderMixin = React.addons.PureRenderMixin;
 
+var Actions = require('../../actions/Actions');
+
 var Icon = require('../Common/Icon.jsx');
 var Bubble = require('../Common/Bubble.jsx');
 
@@ -52,7 +54,7 @@ var DepartureItem = module.exports = React.createClass({
 						<div className="col">
 							{departure.via ? 'Via: ' + departure.via : ''}
 						</div>
-						<div className="-track">{departure.track ? 'Läge: ' + departure.track : ''}</div>
+						<div className="-track">Läge: {departure.track}</div>
 					</div>
 				</div>
 
@@ -61,7 +63,7 @@ var DepartureItem = module.exports = React.createClass({
 	},
 
 	_handleClick: function(e) {
-		console.log('click departure');
+		Actions.setJourney(this.props.departure);
 		e.preventDefault();
 		return false;
 	}

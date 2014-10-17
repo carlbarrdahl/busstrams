@@ -14,9 +14,7 @@ var _data = {
 	currentStation: {},
 	stations: [],
 	departures: [],
-	journeyHistory: {
-		list: []
-	}
+	journeys: {}
 };
 
 var Store = module.exports = Reflux.createStore({
@@ -30,8 +28,10 @@ var Store = module.exports = Reflux.createStore({
 		this.listenTo(Actions.getDepartures, getDepartures);
 		this.listenTo(Actions.clearDepartures, clearDepartures);
 		this.listenTo(Actions.refreshDepartures, refreshDepartures);
+		this.listenTo(Actions.setJourney, setJourney);
 
 		getNearbyStations();
+		setInterval(getNearbyStations, 20000);
 	},
 
 	getInitialState: function() {
@@ -41,7 +41,6 @@ var Store = module.exports = Reflux.createStore({
 });
 
 function emit() {
-	Actions.setLoading(false);
 	Store.trigger(_data);
 }
 
@@ -65,13 +64,20 @@ function setCurrentStation(station) {
 }
 
 function setStations(stations) {
+	setLoading(false);
+
 	_data.stations = stations || [];
 	emit();
 }
 
 function setDepartures(departures) {
+	setLoading(false);
+
+	if (departures && departures.error) {
+		console.error(departures);
+	}
 	_data.departures = departures || [];
-	// emit();
+	emit();
 }
 
 function getNearbyStations() {
@@ -98,12 +104,18 @@ function refreshDepartures(state) {
 	clearInterval(_refreshDeparturesInterval);
 
 	if (state) {
-		_refreshDeparturesInterval = setInterval(Actions.getDepartures.bind(null, _data.currentStation), 20000);
+		_refreshDeparturesInterval = setInterval(Actions.getDepartures.bind(null, _data.currentStation), 10000);
 	}
 }
 
 function clearDepartures() {
 	setCurrentStation();
 	setDepartures();
-	// setTimeout(setDepartures, 200);
+}
+
+
+function setJourney(journey) {
+	console.log('setJourney', journey);
+	_data.journeys[journey.sname + '_' + journey.direction] = journey;
+	emit();
 }

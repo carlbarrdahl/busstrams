@@ -26,17 +26,6 @@ var Station = React.createClass({
 	_handleClick: function(e) {
 		Actions.getDepartures(this.props.station);
 		Actions.setState('departures');
-		// document.body.className = 'departures'
-
-		// TODO: Create a custom Router to handle this stuff
-
-		// if (document.body.className === 'departures') {
-		// 	Actions.clearDepartures();
-		// 	return document.body.className = 'stations';
-		// }
-
-		// document.body.className = 'departures'
-		// document.body.scrollTop = 0;
 	}
 
 });

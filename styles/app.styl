@@ -1,8 +1,17 @@
-@import url(https://fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light,bolditalic,black,medium)
+// @import url(https://fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light,bolditalic,black,medium)
 
 @font-face
-  font-family 'BLOKKRegular'
-  src url('../../assets/fonts/BLOKKRegular.woff') format('woff')
+	font-family 'Roboto'
+	src url('../../assets/fonts/Roboto-Regular.ttf') format('truetype')
+
+@font-face
+	font-family 'RobotoCondensed'
+	src url('../../assets/fonts/RobotoCondensed-Light.ttf') format('truetype')
+
+@font-face
+	font-family 'RobotoBlack'
+	src url('../../assets/fonts/Roboto-Black.ttf') format('truetype')
+
 
 @import 'variables'
 @import 'global'
@@ -19,12 +28,8 @@
 @import 'components/stations'
 
 body
-	color _gray-darker
 	font-body()
 	-webkit-overflow-scrolling: touch;
-
-h3
-	font-weight 400
 
 main
 	height calc(100% - 56px)
@@ -35,14 +40,3 @@ main
 
 .col
 	flex 1
-
-
-.disable-hover,
-.disable-hover * {
-  pointer-events: none !important;
-}
-
-
-.BLOKK
-	font-family 'BLOKKRegular'
-	height _list-height-departure

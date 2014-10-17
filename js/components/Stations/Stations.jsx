@@ -14,14 +14,12 @@ var Stations = module.exports = React.createClass({
 	},
 
 	render: function() {
-		console.log('render station', this.props)
-		var current = this.props.selected.id;
 
 		return (
 			<CSSTransitionGroup transitionName="animation-fall" className="Stations">
 				{
 					this.props.stations.map(function(station) {
-						return <StationItem key={station.id} station={station} selected={current} />;
+						return <StationItem key={station.id} station={station} />;
 					})
 				}
 			</CSSTransitionGroup>

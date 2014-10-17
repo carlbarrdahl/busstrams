@@ -2,10 +2,14 @@
 	font-title()
 	transition transform .3s
 	max-height 400px
+	min-height _list-height-departure
 	overflow auto
 	overflow-x hidden
 	-webkit-overflow-scrolling touch
 	box-shadow 0 4px 15px -8px _gray-darker
+	position absolute
+	width 100%
+	background #fff
 
 .Departures__item
 	flex-center()
@@ -19,20 +23,16 @@
 
 	.-meta
 		font-subheader()
+		padding-top 6px
 
 		.-track
 			text-align center
-			padding-top 6px
 
 	.-time
+		span:nth-child(1)
+			width 25px
+			text-align right
+			padding-right 6px
 
-		span
-			display inline-block
-
-			&:nth-child(1)
-				width 25px
-				text-align right
-				padding-right 6px
-
-			&:nth-child(2)
-				font-caption()
+		span:nth-child(2)
+			font-caption()

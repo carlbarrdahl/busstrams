@@ -3,7 +3,7 @@ _base-color = #556270
 
 _gray-darker = darken(_base-color, 30%)
 _gray-dark = lighten(_base-color, 0%)
-_gray-light = #ccc
+_gray-light = lighten(_base-color, 70%)
 _gray-lighter = lighten(_base-color, 90%)
 
 //Lists
@@ -11,7 +11,8 @@ _list-height-station = 48px
 _list-height-departure = 72px
 
 // Fonts
-_font-family = 'RobotoDraft', Arial
+_font-family = 'Roboto'
+_font-family-condensed = 'RobotoCondensed'
 _font-title = 20px _font-family
 _font-subheader = 14px _font-family
 _font-caption = 12px _font-family
@@ -26,16 +27,22 @@ font-body()
 	color _gray-darker
 
 font-title()
+	font-size 18px
+	color _gray-darker
+
+font-header()
 	font-size 20px
 	color _gray-darker
 
+
 font-subheader()
 	font-size 14px
-	color _gray-dark
+	font-family _font-family-condensed
 
 font-caption()
 	font-size 12px
 	color _gray-dark
+	font-family _font-family-condensed
 
 ellipsis()
 	white-space nowrap

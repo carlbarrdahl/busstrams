@@ -1,7 +1,14 @@
-@import url("https://fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light,bolditalic,black,medium");
 @font-face {
-  font-family: 'BLOKKRegular';
-  src: url("../../assets/fonts/BLOKKRegular.woff") format('woff');
+  font-family: 'Roboto';
+  src: url("../../assets/fonts/Roboto-Regular.ttf") format('truetype');
+}
+@font-face {
+  font-family: 'RobotoCondensed';
+  src: url("../../assets/fonts/RobotoCondensed-Light.ttf") format('truetype');
+}
+@font-face {
+  font-family: 'RobotoBlack';
+  src: url("../../assets/fonts/Roboto-Black.ttf") format('truetype');
 }
 html {
   -ms-text-size-adjust: 100%;
@@ -341,23 +348,16 @@ img {
             transform: rotate(360deg);
   }
 }
-.Stations,
-.Departures {
-  position: absolute;
-  width: 100%;
-  background: #fff;
-}
 main.stations .Departures {
   -webkit-transform: translate3d(0, -110%, 0);
           transform: translate3d(0, -110%, 0);
 }
-main.departures .Stations,
-main.departures .Stations div {
+main.departures .Stations {
   -webkit-transition: color 0.3s;
           transition: color 0.3s;
   overflow: hidden;
   pointer-events: none;
-  color: #ccc;
+  color: #cad0d6 !important;
 }
 main.departures .Omnibutton .icon.icon-spinner svg g path:nth-of-type(odd) {
   opacity: 0;
@@ -369,7 +369,7 @@ main.departures .Omnibutton .icon.icon-spinner svg g path:nth-of-type(even) {
 }
 .Bubble {
   font-size: 14px;
-  color: #556270;
+  font-family: 'RobotoCondensed';
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -389,15 +389,19 @@ main.departures .Omnibutton .icon.icon-spinner svg g path:nth-of-type(even) {
   margin-right: 16px;
 }
 .Departures {
-  font-size: 20px;
+  font-size: 18px;
   color: #3b454e;
   -webkit-transition: -webkit-transform 0.3s;
           transition: transform 0.3s;
   max-height: 400px;
+  min-height: 72px;
   overflow: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   box-shadow: 0 4px 15px -8px #3b454e;
+  position: absolute;
+  width: 100%;
+  background: #fff;
 }
 .Departures__item {
   display: -webkit-box;
@@ -423,14 +427,11 @@ main.departures .Omnibutton .icon.icon-spinner svg g path:nth-of-type(even) {
 }
 .Departures__item .-meta {
   font-size: 14px;
-  color: #556270;
+  font-family: 'RobotoCondensed';
+  padding-top: 6px;
 }
 .Departures__item .-meta .-track {
   text-align: center;
-  padding-top: 6px;
-}
-.Departures__item .-time span {
-  display: inline-block;
 }
 .Departures__item .-time span:nth-child(1) {
   width: 25px;
@@ -440,6 +441,7 @@ main.departures .Omnibutton .icon.icon-spinner svg g path:nth-of-type(even) {
 .Departures__item .-time span:nth-child(2) {
   font-size: 12px;
   color: #556270;
+  font-family: 'RobotoCondensed';
 }
 main {
   padding-top: 56px;
@@ -464,7 +466,7 @@ main {
   width: 100%;
   height: 56px;
   background: #edeff1;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #cad0d6;
   z-index: 1000;
 }
 .Journey a {
@@ -555,8 +557,11 @@ main {
   -webkit-transition: color 0.3s;
           transition: color 0.3s;
   max-height: calc(100% - 56px);
-  font-size: 20px;
+  font-size: 18px;
   color: #3b454e;
+  position: absolute;
+  width: 100%;
+  background: #fff;
 }
 .Stations .Stations__item {
   display: -webkit-box;
@@ -581,17 +586,13 @@ main {
 }
 .Stations .Stations__item > div {
   font-size: 14px;
-  color: #556270;
+  font-family: 'RobotoCondensed';
 }
 body {
-  color: #3b454e;
-  font-family: 'RobotoDraft', Arial;
+  font-family: 'Roboto';
   font-size: 14px;
   color: #3b454e;
   -webkit-overflow-scrolling: touch;
-}
-h3 {
-  font-weight: 400;
 }
 main {
   height: calc(100% - 56px);
@@ -612,12 +613,4 @@ main {
   -webkit-flex: 1;
       -ms-flex: 1;
           flex: 1;
-}
-.disable-hover,
-.disable-hover * {
-  pointer-events: none !important;
-}
-.BLOKK {
-  font-family: 'BLOKKRegular';
-  height: 72px;
 }
