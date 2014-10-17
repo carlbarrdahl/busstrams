@@ -1,40 +1,23 @@
 .Departures
+	font-title()
 	transition transform .3s
 	max-height 400px
-	overflow scroll
+	overflow auto
 	overflow-x hidden
-	box-shadow 0 4px 15px -8px rgba(0,0,0,.8)
+	box-shadow 0 4px 15px -8px _gray-darker
 
-	a
-		display flex
-		flex-direction row
-		align-items center
-		min-height 72px
-		border-bottom 1px solid #eee
-		padding	0 16px
-		background #fff
-
-		figure
-			display flex
-			min-width 40px
-			height 40px
-			font-size 80%
-			font-weight bold
-			border-radius 50%;
-			border 1px solid #eee
-			align-items center
-			justify-content: center;
-			margin-right 16px
-
+	.Departures__item
+		flex-center()
+		padding-h()
+		min-height _list-height-departure
+		border-bottom 1px solid _gray-lighter
 
 		h4
 			flex 1
-			white-space nowrap
-			overflow hidden
-			text-overflow ellipsis
+			ellipsis()
 
 		.-meta
-			font-size 70%
+			font-subheader()
 
 			.-track
 				text-align center
@@ -51,4 +34,4 @@
 					padding-right 6px
 
 				&:nth-child(2)
-					font-size 50%
+					font-caption()

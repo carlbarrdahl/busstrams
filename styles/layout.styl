@@ -9,12 +9,11 @@ main.stations
 		transform translate3d(0, -110%, 0)
 
 main.departures
-	.Stations
+	.Stations, .Stations div
+		transition color .3s
 		overflow hidden
 		pointer-events none
-
-		li
-			opacity .3
+		color _gray-light
 
 	.Omnibutton
 

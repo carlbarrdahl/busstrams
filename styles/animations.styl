@@ -23,7 +23,7 @@ $animationDelay = 0.03s
 .animation-fall-enter
 	opacity 0.01
 	transform translate3d(0, -100%, 0)
-	transition .4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+	transition opacity .4s, transform .4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
 
 	for $i in (1)..(20)
 		&:nth-child({$i})

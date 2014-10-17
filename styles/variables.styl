@@ -1,0 +1,52 @@
+// Colors
+_gray-darker = #333
+_gray-dark = #888
+_gray-light = #ccc
+_gray-lighter = #eee
+
+//Lists
+_list-height-station = 48px
+_list-height-departure = 72px
+
+// Fonts
+_font-family = 'RobotoDraft', Arial
+_font-title = 20px _font-family
+_font-subheader = 14px _font-family
+_font-caption = 12px _font-family
+
+// Bubble
+_bubble-size = 40px
+
+// Mixins
+font-body()
+	font-family _font-family
+	font-size 14px
+	color _gray-darker
+
+font-title()
+	font-size 20px
+	color _gray-darker
+
+font-subheader()
+	font-size 14px
+	color _gray-dark
+
+font-caption()
+	font-size 12px
+	color _gray-dark
+
+ellipsis()
+	white-space nowrap
+	overflow hidden
+	text-overflow ellipsis
+
+flex-center()
+	display flex
+	align-items center
+
+flex-center-middle()
+	flex-center()
+	justify-content: center;
+
+padding-h()
+	padding 0 16px

@@ -4,7 +4,7 @@ var Geo = require('../helpers/geo');
 var Api = require('../api/vasttrafik');
 
 var _data = {
-	state: null,
+	state: 'stations',
 	lastOnline: Date.now(),
 	loading: true,
 	position: {

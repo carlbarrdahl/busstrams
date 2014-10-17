@@ -1,13 +1,13 @@
 .Stations
+	transition color .3s
 	max-height calc(100% - 56px)
+	font-title()
 
 	.Stations__item
-		display flex
-		flex-direction row
-		align-items center
-		min-height 48px
-		border-bottom 1px solid #eee
-		padding	0 16px
+		flex-center()
+		padding-h()
+		min-height _list-height-station
+		border-bottom 1px solid _gray-lighter
 		background #fff
 		position relative
 
@@ -15,5 +15,4 @@
 			flex 1
 
 		> div
-			font-size 80%
-			font-weight 300
+			font-subheader()

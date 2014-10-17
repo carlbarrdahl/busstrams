@@ -17,14 +17,17 @@ var Departures = module.exports = React.createClass({
 	},
 
 	render: function() {
-		// console.log('Render departures', this.props);
+		var departures = this.props.departures.list;
+
+		departures = departures.map(function(departure, id) {
+			return <DepartureItem key={id} departure={departure} />;
+		});
+
+		departures = departures.length ? departures : <DepartureItem />
+
 		return (
 			<CSSTransitionGroup transitionName="animation-fall" className="Departures">
-				{
-					this.props.departures.list.map(function(departure, id) {
-						return <DepartureItem key={id} departure={departure} />;
-					})
-				}
+				{departures}
 			</CSSTransitionGroup>
 		)
 	}

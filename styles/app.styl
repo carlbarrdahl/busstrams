@@ -1,11 +1,17 @@
 @import url(https://fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light,bolditalic,black,medium)
 
+@font-face
+  font-family 'BLOKKRegular'
+  src url('../../assets/fonts/BLOKKRegular.woff') format('woff')
+
+@import 'variables'
 @import 'global'
 
 @import 'animations'
 @import 'icons'
 @import 'layout'
 
+@import 'components/bubble'
 @import 'components/departures'
 @import 'components/header'
 @import 'components/journey'
@@ -13,7 +19,8 @@
 @import 'components/stations'
 
 body
-	color #333
+	color _gray-darker
+	font-body()
 
 h3
 	font-weight 400
@@ -33,3 +40,9 @@ main
 .disable-hover * {
   pointer-events: none !important;
 }
+
+
+.BLOKK
+	font-family 'BLOKKRegular'
+	height _list-height-departure
+	opacity 0.5
