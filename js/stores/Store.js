@@ -71,6 +71,7 @@ function setStations(stations) {
 }
 
 function setDepartures(departures) {
+	console.trace()
 	setLoading(false);
 
 	if (departures && departures.error) {
@@ -109,7 +110,6 @@ function refreshDepartures(state) {
 }
 
 function clearDepartures() {
-	setCurrentStation();
 	setDepartures();
 }
 

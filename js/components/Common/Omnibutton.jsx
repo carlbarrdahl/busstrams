@@ -22,7 +22,7 @@ var Omnibutton = module.exports = React.createClass({
 	},
 
 	_handleOnTouchStart: function(e) {
-		Actions.clearDepartures();
+		// Actions.clearDepartures();
 	}
 
 });

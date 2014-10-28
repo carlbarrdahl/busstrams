@@ -257,7 +257,7 @@ var Omnibutton = module.exports = React.createClass({displayName: 'exports',
 	},
 
 	_handleOnTouchStart: function(e) {
-		Actions.clearDepartures();
+		// Actions.clearDepartures();
 	}
 
 });
@@ -476,6 +476,7 @@ var Station = React.createClass({displayName: 'Station',
 	},
 
 	_handleClick: function(e) {
+		Actions.clearDepartures();
 		Actions.getDepartures(this.props.station);
 		Actions.setState('departures');
 	}
@@ -694,6 +695,7 @@ function setStations(stations) {
 }
 
 function setDepartures(departures) {
+	console.trace()
 	setLoading(false);
 
 	if (departures && departures.error) {
@@ -732,7 +734,6 @@ function refreshDepartures(state) {
 }
 
 function clearDepartures() {
-	setCurrentStation();
 	setDepartures();
 }
 

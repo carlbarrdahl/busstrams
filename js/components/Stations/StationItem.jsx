@@ -24,6 +24,7 @@ var Station = React.createClass({
 	},
 
 	_handleClick: function(e) {
+		Actions.clearDepartures();
 		Actions.getDepartures(this.props.station);
 		Actions.setState('departures');
 	}
